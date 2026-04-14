@@ -21,7 +21,8 @@ import {
   ShieldCheck,
   PowerOff,
   Clock,
-  Pencil
+  Pencil,
+  Github
 } from "lucide-react";
 import LoginModal from "@/components/LoginModal";
 import ProfileModal from "@/components/ProfileModal";
@@ -955,7 +956,27 @@ export default function HomePage() {
         </div>
       )}
       </AnimatePresence>
-          </motion.div>
+        <footer className="site-footer">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <div className="footer-logo">Vibrant<span>Eats</span></div>
+              <p>Experience gourmet flavors delivered directly to your doorstep with zero middleman commission.</p>
+            </div>
+            
+            <div className="footer-links">
+              <div className="footer-group">
+                <h4>Connect</h4>
+                <a href="https://github.com/harihara73/vibrant-eats" target="_blank" rel="noopener noreferrer" className="github-link-btn">
+                  <Github size={20} />
+                  <span>View Source on GitHub</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; {new Date().getFullYear()} VibrantEats. Built with Excellence by harihara73.</p>
+          </div>
+        </footer>
       </div>
 
       <style jsx>{`
@@ -963,6 +984,88 @@ export default function HomePage() {
           width: 100%;
           min-height: 100vh;
           min-height: 100dvh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .site-footer {
+          background: #020617;
+          color: white;
+          padding: 4rem 4% 2rem;
+          margin-top: auto;
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .footer-content {
+          max-width: 1200px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1.5fr 1fr;
+          gap: 4rem;
+          margin-bottom: 4rem;
+        }
+
+        .footer-logo {
+          font-size: 1.75rem;
+          font-weight: 950;
+          letter-spacing: -0.05em;
+          margin-bottom: 1.5rem;
+        }
+        .footer-logo span { color: var(--accent); }
+        
+        .footer-brand p {
+          color: #94a3b8;
+          line-height: 1.6;
+          font-size: 1.05rem;
+          max-width: 400px;
+          font-weight: 500;
+        }
+
+        .footer-group h4 {
+          text-transform: uppercase;
+          font-size: 0.75rem;
+          letter-spacing: 0.1em;
+          color: #64748b;
+          font-weight: 900;
+          margin-bottom: 1.5rem;
+        }
+
+        .github-link-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 0.875rem 1.5rem;
+          border-radius: 1.25rem;
+          color: white;
+          font-weight: 800;
+          font-size: 0.95rem;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .github-link-btn:hover {
+          background: white;
+          color: #020617;
+          transform: translateY(-3px);
+          box-shadow: 0 10px 25px -5px rgba(255,255,255,0.15);
+        }
+
+        .footer-bottom {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding-top: 2rem;
+          border-top: 1px solid rgba(255,255,255,0.05);
+          display: flex;
+          justify-content: center;
+          color: #64748b;
+          font-size: 0.9rem;
+          font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+          .footer-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+          .footer-brand p { margin: 0 auto 1.5rem; }
+          .github-link-btn { justify-content: center; }
         }
 
         .navbar {
