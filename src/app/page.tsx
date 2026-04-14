@@ -22,7 +22,7 @@ import {
   PowerOff,
   Clock,
   Pencil,
-  GitHub
+  Globe
 } from "lucide-react";
 import LoginModal from "@/components/LoginModal";
 import ProfileModal from "@/components/ProfileModal";
@@ -967,7 +967,7 @@ export default function HomePage() {
               <div className="footer-group">
                 <h4>Connect</h4>
                 <a href="https://github.com/harihara73/vibrant-eats" target="_blank" rel="noopener noreferrer" className="github-link-btn">
-                  <GitHub size={20} />
+                  <Globe size={20} />
                   <span>View Source on GitHub</span>
                 </a>
               </div>
