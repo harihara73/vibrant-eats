@@ -1,0 +1,19 @@
+{
+  "name": "VibrantEats",
+  "short_name": "VibrantEats",
+  "description": "Premium Gourmet Food Delivery",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vibrant_eats_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "shopping"]
+}

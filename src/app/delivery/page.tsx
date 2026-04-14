@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut, useSession } from "next-auth/react";
 import DeliveryRouteMap from "@/components/DeliveryRouteMap";
+import BottomInstallButton from "@/components/BottomInstallButton";
 import "./delivery.css";
 
 interface Order {
@@ -514,6 +515,11 @@ export default function DeliveryApp() {
           onClose={() => setShowRouteFor(null)}
         />
       )}
+
+      {/* Bottom Install App Trigger */}
+      <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
+        <BottomInstallButton appName="Delivery" />
+      </div>
     </div>
   );
 }

@@ -22,10 +22,13 @@ import {
   PowerOff,
   Clock,
   Pencil,
-  Globe
+  Globe,
+  Link as LinkIcon
 } from "lucide-react";
+import Link from "next/link";
 import LoginModal from "@/components/LoginModal";
 import ProfileModal from "@/components/ProfileModal";
+import TopInstallButton from "@/components/TopInstallButton";
 import dynamic from "next/dynamic";
 import { haversineDistance, estimateDeliveryMinutes } from "@/lib/distance";
 
@@ -316,37 +319,43 @@ export default function HomePage() {
         <div className="nav-logo">Vibrant<span>Eats</span></div>
         <div className="nav-actions">
           {session ? (
-            <div className="account-pill">
-              <span className="user-name">{session?.user?.name?.split(' ')[0] || "User"}</span>
-              <div className="pill-actions">
-                <button 
-                  className="btn-icon-gourmet" 
-                  onClick={() => setIsProfileModalOpen(true)}
-                  title="Profile Settings"
-                >
-                  <User size={18} />
-                </button>
-                <button 
-                  className="btn-icon-gourmet" 
-                  onClick={() => router.push('/my-orders')}
-                  title="My Orders"
-                >
-                  <History size={18} />
-                </button>
-                <button 
-                  className="btn-icon-gourmet danger" 
-                  onClick={() => signOut()}
-                  title="Sign Out"
-                >
-                  <LogOut size={18} />
-                </button>
+            <>
+              <TopInstallButton />
+              <div className="account-pill">
+                <span className="user-name">{session?.user?.name?.split(' ')[0] || "User"}</span>
+                <div className="pill-actions">
+                  <button 
+                    className="btn-icon-gourmet" 
+                    onClick={() => setIsProfileModalOpen(true)}
+                    title="Profile Settings"
+                  >
+                    <User size={18} />
+                  </button>
+                  <button 
+                    className="btn-icon-gourmet" 
+                    onClick={() => router.push('/my-orders')}
+                    title="My Orders"
+                  >
+                    <History size={18} />
+                  </button>
+                  <button 
+                    className="btn-icon-gourmet danger" 
+                    onClick={() => signOut()}
+                    title="Sign Out"
+                  >
+                    <LogOut size={18} />
+                  </button>
+                </div>
               </div>
-            </div>
+            </>
           ) : (
-            <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>
-              <User size={18} />
-              Login
-            </button>
+            <div className="nav-guest-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <TopInstallButton />
+              <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>
+                <User size={18} />
+                Login
+              </button>
+            </div>
           )}
 
           <button className="location-bar" onClick={() => handleGetLocation(false)}>
@@ -973,6 +982,19 @@ export default function HomePage() {
               <div className="footer-logo">Vibrant<span>Eats</span></div>
               <p>Experience gourmet flavors delivered directly to your doorstep with zero middleman commission.</p>
             </div>
+            <div className="footer-staff">
+              <h4>Staff & Management</h4>
+              <nav className="staff-links">
+                <Link href="/admin/dashboard" className="staff-link">
+                  <ShieldCheck size={16} />
+                  Admin Portal
+                </Link>
+                <Link href="/delivery" className="staff-link">
+                  <Globe size={16} />
+                  Partner Portal
+                </Link>
+              </nav>
+            </div>
           </div>
           <div className="footer-bottom">
             <p>&copy; {new Date().getFullYear()} VibrantEats. Built with Excellence by harihara73.</p>
@@ -1023,13 +1045,35 @@ export default function HomePage() {
           font-weight: 500;
         }
 
-        .footer-group h4 {
+        .footer-staff h4 {
           text-transform: uppercase;
           font-size: 0.75rem;
           letter-spacing: 0.1em;
           color: #64748b;
           font-weight: 900;
           margin-bottom: 1.5rem;
+        }
+
+        .staff-links {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .staff-link {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          color: #f1f5f9;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+        }
+
+        .staff-link:hover {
+          color: var(--accent);
+          transform: translateX(5px);
         }
 
         .github-link-btn {
@@ -1067,6 +1111,7 @@ export default function HomePage() {
         @media (max-width: 768px) {
           .footer-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
           .footer-brand p { margin: 0 auto 1.5rem; }
+          .staff-links { align-items: center; }
           .github-link-btn { justify-content: center; }
         }
 

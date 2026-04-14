@@ -1,0 +1,20 @@
+{
+  "name": "VibrantEats Admin",
+  "short_name": "VE Admin",
+  "description": "Manage your restaurant operations",
+  "start_url": "/admin/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vibrant_eats_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "scope": "/admin"
+}

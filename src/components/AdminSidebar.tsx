@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useAdmin } from "@/context/AdminContext";
+import BottomInstallButton from "@/components/BottomInstallButton";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -112,6 +113,9 @@ export default function AdminSidebar() {
               )}
               <span>{isLive ? 'Restaurant Live' : 'Restaurant Closed'}</span>
             </button>
+          </div>
+          <div style={{ padding: '0 1rem 0.5rem' }}>
+            <BottomInstallButton appName="Admin" />
           </div>
           <button className="logout-btn" onClick={() => signOut({ callbackUrl: '/admin/login' })}>
             <LogOut size={20} />

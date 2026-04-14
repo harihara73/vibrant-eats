@@ -1,0 +1,20 @@
+{
+  "name": "VibrantEats Delivery",
+  "short_name": "VE Delivery",
+  "description": "Delivery partner companion app",
+  "start_url": "/delivery",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e1b4b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vibrant_eats_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "logistics"],
+  "scope": "/delivery"
+}
