@@ -14,8 +14,10 @@ import {
   X,
   Save,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Image as ImageField
 } from "lucide-react";
+import ImageUpload from "@/components/ImageUpload";
 
 interface MenuItem {
   _id: string;
@@ -291,17 +293,30 @@ export default function MenuPage() {
                     <div key={item._id} className="stat-card" style={{ padding: 0, overflow: 'hidden' }}>
                       <div 
                         style={{ 
-                          height: '180px', 
+                          height: '220px', 
                           width: '100%', 
-                          background: item.image ? `url(${item.image}) center/cover` : '#f1f5f9',
+                          background: '#f8fafc',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           color: 'var(--text-muted)',
-                          position: 'relative'
+                          position: 'relative',
+                          overflow: 'hidden'
                         }}
                       >
-                        {!item.image && <ImageIcon size={40} />}
+                        {item.image ? (
+                          <img 
+                            src={item.image} 
+                            alt={item.name} 
+                            style={{ 
+                              width: '100%', 
+                              height: '100%', 
+                              objectFit: 'cover' 
+                            }} 
+                          />
+                        ) : (
+                          <ImageIcon size={40} />
+                        )}
                         {item.discount > 0 && (
                           <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'var(--success)', color: 'white', padding: '0.25rem 0.6rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800 }}>
                             {item.discount}% OFF
@@ -630,13 +645,11 @@ export default function MenuPage() {
                   </div>
                 </div>
                 <div className="form-group">
-                  <label>Image URL</label>
-                  <input
-                    type="url"
-                    className="form-input"
+                  <label>Dish Image</label>
+                  <ImageUpload 
                     value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://images.unsplash.com/..."
+                    onChange={(base64) => setFormData({ ...formData, image: base64 })}
+                    aspectRatio={1} // Square preferred for dishes
                   />
                 </div>
                 <div className="form-group">

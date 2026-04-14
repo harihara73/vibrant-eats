@@ -962,16 +962,6 @@ export default function HomePage() {
               <div className="footer-logo">Vibrant<span>Eats</span></div>
               <p>Experience gourmet flavors delivered directly to your doorstep with zero middleman commission.</p>
             </div>
-            
-            <div className="footer-links">
-              <div className="footer-group">
-                <h4>Connect</h4>
-                <a href="https://github.com/harihara73/vibrant-eats" target="_blank" rel="noopener noreferrer" className="github-link-btn">
-                  <Globe size={20} />
-                  <span>View Source on GitHub</span>
-                </a>
-              </div>
-            </div>
           </div>
           <div className="footer-bottom">
             <p>&copy; {new Date().getFullYear()} VibrantEats. Built with Excellence by harihara73.</p>
