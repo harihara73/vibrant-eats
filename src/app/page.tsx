@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useCart } from "@/lib/CartContext";
@@ -75,11 +75,8 @@ export default function HomePage() {
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
   const [restaurantCoords, setRestaurantCoords] = useState({ lat: 17.4348, lng: 82.2270 });
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState(5);
-  const [deliveryInfo, setDeliveryInfo] = useState<{ distanceKm: number; minutes: number } | null>(null);
-  const [distanceError, setDistanceError] = useState("");
   const [deliveryCharges, setDeliveryCharges] = useState<Record<number, number>>({ 5: 15, 10: 25, 15: 35, 20: 50 });
   const [deliveryDiscount, setDeliveryDiscount] = useState(0);
-  const [deliveryChargeAmount, setDeliveryChargeAmount] = useState(0);
   const [addressEditIndex, setAddressEditIndex] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -214,23 +211,31 @@ export default function HomePage() {
   };
 
   // Recompute delivery distance whenever the user's location changes
-  useEffect(() => {
-    if (!location) { setDeliveryInfo(null); setDistanceError(""); setDeliveryChargeAmount(0); return; }
+  const deliveryCalc = useMemo(() => {
+    if (!location) return { info: null, error: "", charge: 0 };
+    
     const dist = haversineDistance(restaurantCoords.lat, restaurantCoords.lng, location.lat, location.lng);
     const mins = estimateDeliveryMinutes(dist);
-    setDeliveryInfo({ distanceKm: dist, minutes: mins });
+    const info = { distanceKm: dist, minutes: mins };
+    
+    let error = "";
+    let charge = 0;
+    
     if (dist > deliveryRadiusKm) {
-      setDistanceError(`⚠️ You are ${dist.toFixed(1)} km away. We only deliver within ${deliveryRadiusKm} km.`);
-      setDeliveryChargeAmount(0);
+      error = `⚠️ You are ${dist.toFixed(1)} km away. We only deliver within ${deliveryRadiusKm} km.`;
     } else {
-      setDistanceError("");
       // Find which tier applies
       const activeTier = [5, 10, 15, 20].find(t => dist <= t) ?? 20;
       const base = deliveryCharges[activeTier] ?? 0;
-      const charge = deliveryDiscount > 0 ? Math.round(base * (1 - deliveryDiscount / 100)) : base;
-      setDeliveryChargeAmount(charge);
+      charge = deliveryDiscount > 0 ? Math.round(base * (1 - deliveryDiscount / 100)) : base;
     }
+    
+    return { info, error, charge };
   }, [location, restaurantCoords, deliveryRadiusKm, deliveryCharges, deliveryDiscount]);
+
+  const deliveryInfo = deliveryCalc.info;
+  const distanceError = deliveryCalc.error;
+  const deliveryChargeAmount = deliveryCalc.charge;
 
   const handlePlaceOrder = async () => {
     if (!isRestaurantOpen) {
