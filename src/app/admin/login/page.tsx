@@ -57,15 +57,28 @@ export default function LoginPage() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="auth-portal-card"
         >
-          {/* Brand/Identity Side */}
+          {/* LEFT SIDE: Branding / Image Section */}
           <div className="brand-panel">
+            <div className="brand-overlay"></div>
             <div className="panel-inner">
               <header className="portal-header">
                 <div className="premium-logo-mark">
                   <span>VE</span>
                 </div>
-                <h1>VibrantEats</h1>
-                <p>Enterprise Management Suite</p>
+                <motion.h1 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  VibrantEats
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  Enterprise Management Suite
+                </motion.p>
               </header>
 
               <div className="portal-features">
@@ -78,7 +91,7 @@ export default function LoginPage() {
                     key={idx}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + idx * 0.1 }}
+                    transition={{ delay: 0.6 + idx * 0.1 }}
                     className="feature-pill"
                   >
                     <span className="pill-icon">{item.icon}</span>
@@ -93,7 +106,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Form Side */}
+          {/* RIGHT SIDE: Login Form Section */}
           <div className="form-panel">
             <div className="form-inner">
               <div className="form-head">
@@ -158,67 +171,64 @@ export default function LoginPage() {
 
       <style jsx>{`
         .admin-auth-root {
-          min-height: 100vh;
+          height: 100vh;
+          width: 100vw;
           background: #020617;
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
           overflow: hidden;
-          font-family: inherit;
-        }
-
-        .cinematic-bg {
-          position: absolute;
-          top: 0; left: 0; right: 0; bottom: 0;
-          z-index: 1;
-        }
-        .glow-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(120px);
-          opacity: 0.4;
-        }
-        .orb-1 {
-          width: 500px; height: 500px;
-          background: #dc2626;
-          top: -100px; left: -100px;
-        }
-        .orb-2 {
-          width: 400px; height: 400px;
-          background: #4f46e5;
-          bottom: -50px; right: -50px;
+          margin: 0;
+          padding: 0;
         }
 
         .auth-stage {
-          position: relative;
-          z-index: 10;
           width: 100%;
-          max-width: 1000px;
-          padding: 2rem;
-        }
-
-        .auth-portal-card {
-          background: #ffffff;
-          border-radius: 2.5rem;
+          height: 100%;
           display: flex;
-          min-height: 640px;
-          box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.1);
+          align-items: stretch;
+          justify-content: stretch;
         }
 
-        /* LEFT PANEL */
+        :global(.auth-portal-card) {
+          width: 100%;
+          height: 100%;
+          display: flex !important;
+          background: #ffffff;
+          box-shadow: none !important;
+          border-radius: 0 !important;
+          border: none !important;
+          overflow: hidden;
+        }
+
+        /* LEFT PANEL: 50% WIDTH */
         .brand-panel {
-          flex: 1.2;
+          flex: 1;
           background: #0f172a;
           color: white;
           padding: 4rem;
           position: relative;
           display: flex;
           flex-direction: column;
+          z-index: 10;
         }
-        .panel-inner { height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+
+        .brand-overlay {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: radial-gradient(circle at 0% 0%, #dc2626 0%, transparent 50%),
+                      radial-gradient(circle at 100% 100%, #4f46e5 0%, transparent 50%);
+          opacity: 0.15;
+          z-index: -1;
+        }
+
+        .panel-inner { 
+          height: 100%; 
+          display: flex; 
+          flex-direction: column; 
+          justify-content: space-between; 
+        }
         
         .premium-logo-mark {
           width: 64px; height: 64px;
@@ -230,84 +240,93 @@ export default function LoginPage() {
           margin-bottom: 2rem;
         }
 
-        .portal-header h1 { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.05em; margin-bottom: 0.5rem; line-height: 1; }
-        .portal-header p { color: #94a3b8; font-weight: 500; font-size: 1rem; }
+        .portal-header h1 { font-size: 3rem; font-weight: 900; letter-spacing: -0.05em; margin-bottom: 1rem; line-height: 1; }
+        .portal-header p { color: #94a3b8; font-weight: 500; font-size: 1.1rem; }
 
-        .portal-features { display: flex; flex-direction: column; gap: 1rem; margin: 3rem 0; }
+        .portal-features { display: flex; flex-direction: column; gap: 1.25rem; margin: auto 0; }
         .feature-pill {
-          display: flex; align-items: center; gap: 1rem;
-          padding: 0.75rem 1.25rem; background: rgba(255,255,255,0.05);
-          border-radius: 1rem; border: 1px solid rgba(255,255,255,0.05);
-          transition: all 0.3s;
+          display: flex; align-items: center; gap: 1.25rem;
+          padding: 1rem 1.5rem; background: rgba(255,255,255,0.05);
+          border-radius: 1.25rem; border: 1px solid rgba(255,255,255,0.1);
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .feature-pill:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .feature-pill:hover { background: rgba(255,255,255,0.1); transform: translateX(10px); }
         .pill-icon { color: #dc2626; display: flex; }
-        .pill-text { font-size: 0.9rem; font-weight: 700; color: #cbd5e1; }
+        .pill-text { font-size: 1rem; font-weight: 700; color: #cbd5e1; }
 
-        .portal-footer p { font-size: 0.75rem; color: #475569; font-weight: 600; }
+        .portal-footer p { font-size: 0.85rem; color: #475569; font-weight: 600; opacity: 0.6; }
 
-        /* RIGHT PANEL */
+        /* RIGHT PANEL: 50% WIDTH & CENTERED */
         .form-panel {
           flex: 1;
           background: #f8fafc;
           padding: 4rem;
-          display: flex; align-items: center;
+          display: flex; 
+          align-items: center; 
+          justify-content: center;
         }
-        .form-inner { width: 100%; }
+        .form-inner { 
+          width: 100%; 
+          max-width: 440px; /* Perfectly sized for a professional form focus */
+        }
         
-        .form-head { margin-bottom: 2.5rem; }
-        .form-head h2 { font-size: 2rem; font-weight: 900; color: #0f172a; letter-spacing: -0.04em; margin-bottom: 0.5rem; }
-        .form-head p { color: #64748b; font-size: 0.95rem; font-weight: 500; line-height: 1.5; }
+        .form-head { margin-bottom: 3rem; text-align: center; }
+        .form-head h2 { font-size: 2.25rem; font-weight: 900; color: #0f172a; letter-spacing: -0.04em; margin-bottom: 0.75rem; }
+        .form-head p { color: #64748b; font-size: 1rem; font-weight: 500; line-height: 1.6; }
 
         .error-callout {
           background: #fef2f2; border: 1px solid #fee2e2; color: #991b1b;
-          padding: 1rem; border-radius: 1rem; margin-bottom: 2rem;
-          font-weight: 700; font-size: 0.85rem; text-align: center;
+          padding: 1.25rem; border-radius: 1.25rem; margin-bottom: 2.5rem;
+          font-weight: 700; font-size: 0.9rem; text-align: center;
         }
 
-        .portal-form { display: flex; flex-direction: column; gap: 1.5rem; }
-        .input-field { display: flex; flex-direction: column; gap: 0.75rem; }
-        .input-field label { font-size: 0.75rem; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; }
+        .portal-form { display: flex; flex-direction: column; gap: 1.75rem; }
+        .input-field { display: flex; flex-direction: column; gap: 0.85rem; }
+        .input-field label { font-size: 0.8rem; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; }
         
         .field-group {
-          display: flex; align-items: center; gap: 1rem;
+          display: flex; align-items: center; gap: 1.25rem;
           background: white; border: 2px solid #e2e8f0;
-          border-radius: 1.25rem; padding: 0 1.25rem;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border-radius: 1.5rem; padding: 0 1.5rem;
+          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .field-group:focus-within {
           border-color: #0f172a;
-          box-shadow: 0 10px 20px -10px rgba(0,0,0,0.1);
+          box-shadow: 0 15px 30px -15px rgba(0,0,0,0.1);
           transform: translateY(-2px);
         }
         .field-group :global(svg) { color: #94a3b8; transition: color 0.3s; }
         .field-group:focus-within :global(svg) { color: #dc2626; }
         .field-group input {
-          flex: 1; padding: 1.25rem 0; border: none; outline: none;
-          background: transparent; font-size: 1rem; font-weight: 700; color: #0f172a;
+          flex: 1; padding: 1.5rem 0; border: none; outline: none;
+          background: transparent; font-size: 1.1rem; font-weight: 700; color: #0f172a;
         }
 
         .portal-submit-btn {
-          margin-top: 1rem;
+          margin-top: 1.5rem;
           background: #0f172a; color: white; border: none;
-          padding: 1.25rem; border-radius: 1.25rem;
+          padding: 1.5rem; border-radius: 1.5rem;
           font-weight: 900; font-size: 1.1rem;
-          display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-          cursor: pointer; transition: all 0.3s;
+          display: flex; align-items: center; justify-content: center; gap: 0.85rem;
+          cursor: pointer; transition: all 0.4s;
           box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.4);
+          width: 100%;
         }
         .portal-submit-btn:hover {
           background: #dc2626;
-          transform: translateY(-4px);
+          transform: translateY(-5px) scale(1.02);
           box-shadow: 0 25px 50px -12px rgba(220, 38, 38, 0.5);
         }
         .portal-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        @media (max-width: 850px) {
-          .auth-portal-card { flex-direction: column; border-radius: 2rem; }
-          .brand-panel { padding: 3rem; }
-          .form-panel { padding: 3rem; }
-          .portal-features { display: none; }
+        @media (max-width: 900px) {
+          .admin-auth-root { height: auto; min-height: 100vh; overflow: auto; }
+          :global(.auth-portal-card) { flex-direction: column !important; min-height: 100vh; }
+          .brand-panel { padding: 3rem 2rem; flex: none; }
+          .form-panel { padding: 4rem 2rem; flex: 1; align-items: flex-start; }
+          .portal-features { margin-top: 2rem; }
+          .brand-overlay { display: none; }
+          .portal-header h1 { font-size: 2.25rem; }
         }
       `}</style>
     </div>
