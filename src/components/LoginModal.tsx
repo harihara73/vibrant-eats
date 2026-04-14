@@ -290,7 +290,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                             {devCode && (
                                 <div className="dev-mode-autofill">
                                   <div className="dev-text">
-                                    <span className="dev-badge">DEV CODE</span>
+                                    <span className="dev-badge">{process.env.NODE_ENV === 'development' ? 'DEV CODE' : 'TEST CODE'}</span>
                                     <span className="dev-val">{devCode}</span>
                                   </div>
                                   <button 
