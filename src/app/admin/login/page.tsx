@@ -172,11 +172,12 @@ export default function LoginPage() {
       <style jsx>{`
         .admin-auth-root {
           height: 100vh;
+          height: 100dvh;
           width: 100vw;
           background: #020617;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items: stretch;
+          justify-content: stretch;
           position: relative;
           overflow: hidden;
           margin: 0;
@@ -184,8 +185,7 @@ export default function LoginPage() {
         }
 
         .auth-stage {
-          width: 100%;
-          height: 100%;
+          flex: 1;
           display: flex;
           align-items: stretch;
           justify-content: stretch;
@@ -264,6 +264,7 @@ export default function LoginPage() {
           display: flex; 
           align-items: center; 
           justify-content: center;
+          overflow-y: auto; /* Allow form to scroll internally if screen is small */
         }
         .form-inner { 
           width: 100%; 

@@ -1,11 +1,5 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI || MONGODB_URI === 'YOUR_CONNECTION_STRING') {
-  throw new Error('Please configure MONGODB_URI in .env.local with your Atlas connection string.');
-}
-
 let cached = (global as any).mongoose;
 
 if (!cached) {
@@ -13,6 +7,12 @@ if (!cached) {
 }
 
 async function connectDB() {
+  const MONGODB_URI = process.env.MONGODB_URI;
+
+  if (!MONGODB_URI || MONGODB_URI === 'YOUR_CONNECTION_STRING') {
+    throw new Error('Please configure MONGODB_URI in .env.local with your Atlas connection string.');
+  }
+
   if (cached.conn) {
     return cached.conn;
   }
@@ -20,7 +20,7 @@ async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
-      connectTimeoutMS: 5000, // Reduced to 5s for diagnostics
+      connectTimeoutMS: 5000,
       serverSelectionTimeoutMS: 5000,
     };
 
@@ -36,7 +36,7 @@ async function connectDB() {
       if (err.message.includes('ETIMEDOUT')) {
         console.error("🔎 Possible Cause: Your IP is not whitelisted in MongoDB Atlas.");
       }
-      cached.promise = null; // Reset promise on failure
+      cached.promise = null;
       throw err;
     });
   }

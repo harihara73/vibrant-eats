@@ -10,7 +10,11 @@ import {
   Loader2, 
   Image as ImageIcon, 
   ShieldCheck,
-  UtensilsCrossed 
+  UtensilsCrossed,
+  X,
+  Save,
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 
 interface MenuItem {
@@ -23,17 +27,8 @@ interface MenuItem {
   isAvailable: boolean;
   discount: number;
   preparationTime: number;
-  dietaryType: "Veg" | "Non-Veg";
+  dietaryType: string;
 }
-
-const CATEGORIES = [
-  "Soups and Salads",
-  "Appetizers / Starters",
-  "Main Course / Entrées",
-  "Sides / Accompaniments",
-  "Desserts",
-  "Beverages"
-];
 
 export default function MenuPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -42,6 +37,11 @@ export default function MenuPage() {
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Dynamic metadata from settings
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableDietaryTypes, setAvailableDietaryTypes] = useState<string[]>([]);
+  
 
   // Form states
   const [formData, setFormData] = useState({
@@ -52,12 +52,42 @@ export default function MenuPage() {
     image: "",
     discount: "0",
     preparationTime: "10",
-    dietaryType: "Veg",
+    dietaryType: "",
   });
+ 
+  // Quick add states
+  const [showAddCategoryInline, setShowAddCategoryInline] = useState(false);
+  const [showAddDietaryInline, setShowAddDietaryInline] = useState(false);
+  const [newInlineCategory, setNewInlineCategory] = useState("");
+  const [newInlineDietary, setNewInlineDietary] = useState("");
 
   useEffect(() => {
+    fetchMetadata();
     fetchItems();
   }, []);
+
+  const fetchMetadata = async () => {
+    try {
+      const res = await fetch("/api/admin/settings");
+      const data = await res.json();
+      if (res.ok) {
+        setAvailableCategories(data.categories || []);
+        setAvailableDietaryTypes(data.dietaryTypes || []);
+        
+        // Set default category if not already set
+        if (!formData.category && data.categories?.length > 0) {
+          setFormData(prev => ({ 
+            ...prev, 
+            category: data.categories[0],
+            dietaryType: data.dietaryTypes?.[0] || "Veg"
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch metadata:", err);
+    }
+  };
+
 
   const fetchItems = async () => {
     setLoading(true);
@@ -100,14 +130,13 @@ export default function MenuPage() {
           price: parsedPrice,
           discount: parsedDiscount,
           preparationTime: parsedPrepTime,
-          dietaryType: formData.dietaryType,
         }),
       });
 
       if (res.ok) {
         setShowModal(false);
         setEditingItem(null);
-        setFormData({ name: "", description: "", price: "", category: CATEGORIES[0], image: "", discount: "0", preparationTime: "10", dietaryType: "Veg" });
+        resetForm();
         await fetchItems();
       } else {
         const errorData = await res.json();
@@ -120,8 +149,20 @@ export default function MenuPage() {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      price: "",
+      category: availableCategories[0] || "",
+      image: "",
+      discount: "0",
+      preparationTime: "10",
+      dietaryType: availableDietaryTypes[0] || "Veg",
+    });
+  };
+
   const handleDelete = async (id: string) => {
-    // Optimistic Update: Remove from local state immediately
     const originalItems = [...items];
     const itemToDelete = items.find(item => item._id === id);
     setItems(items.filter(item => item._id !== id));
@@ -131,13 +172,11 @@ export default function MenuPage() {
       const res = await fetch(`/api/menu/${id.toString()}`, { method: "DELETE" });
       if (!res.ok) {
         const errorData = await res.json();
-        // Rollback state on failure
         setItems(originalItems);
         alert(`Failed to delete ${itemToDelete?.name}: ${errorData.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Failed to delete item:", err);
-      // Rollback state on error
       setItems(originalItems);
       alert("Network error: Could not complete deletion.");
     }
@@ -159,6 +198,18 @@ export default function MenuPage() {
     } catch (err) {
       console.error("Failed to toggle availability:", err);
       alert("Network error: Could not update status.");
+    }
+  };
+
+  const handleInlineMetadataUpdate = async (type: 'categories' | 'dietaryTypes', updatedList: string[]) => {
+    try {
+      await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [type]: updatedList }),
+      });
+    } catch (err) {
+      console.error(`Failed to update ${type}:`, err);
     }
   };
 
@@ -192,7 +243,7 @@ export default function MenuPage() {
             className="btn-primary" 
             onClick={() => {
               setEditingItem(null);
-              setFormData({ name: "", description: "", price: "", category: CATEGORIES[0], image: "", discount: "0", preparationTime: "10", dietaryType: "Veg" });
+              resetForm();
               setShowModal(true);
             }}
           >
@@ -216,8 +267,9 @@ export default function MenuPage() {
           </div>
         )}
 
+
         <div className="admin-menu-list">
-          {CATEGORIES.map((category) => {
+          {availableCategories.length > 0 ? availableCategories.map((category) => {
             const categoryItems = items
               .filter(item => item.category === category)
               .sort((a, b) => a.name.localeCompare(b.name));
@@ -309,11 +361,11 @@ export default function MenuPage() {
                                 name: item.name,
                                 description: item.description || "",
                                 price: (item.price ?? 0).toString(),
-                                category: item.category || CATEGORIES[0],
+                                category: item.category || availableCategories[0],
                                 image: item.image || "",
                                 discount: (item.discount ?? 0).toString(),
                                 preparationTime: (item.preparationTime ?? 10).toString(),
-                                dietaryType: item.dietaryType || "Veg",
+                                dietaryType: item.dietaryType || availableDietaryTypes[0] || "Veg",
                               });
                               setShowModal(true);
                             }}
@@ -344,7 +396,11 @@ export default function MenuPage() {
                 </div>
               </section>
             );
-          })}
+          }) : (
+            <div style={{ gridColumn: '1 / -1', padding: '4rem 2rem', textAlign: 'center', background: 'white', borderRadius: '1.25rem' }}>
+              <p style={{ color: 'var(--text-muted)' }}>No categories found in settings. Go to Settings and add some categories first!</p>
+            </div>
+          )}
           
           {items.length === 0 && !loading && (
             <div style={{ gridColumn: '1 / -1', padding: '6rem 2rem', textAlign: 'center', background: 'white', borderRadius: '1.25rem', border: '2px dashed var(--border)' }}>
@@ -356,7 +412,7 @@ export default function MenuPage() {
         </div>
 
         {showModal && (
-          <div className="sidebar-overlay show" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem' }} onClick={() => setShowModal(false)}>
+          <div className="sidebar-overlay show" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', zIndex: 1000 }} onClick={() => setShowModal(false)}>
             <div 
               className="stat-card" 
               style={{ width: '100%', maxWidth: '500px', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}
@@ -390,48 +446,187 @@ export default function MenuPage() {
                   <div className="form-group">
                     <label>Discount (%)</label>
                     <input
-                      type="number"
-                      className="form-input"
-                      value={formData.discount}
-                      onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                       type="number"
+                       className="form-input"
+                       value={formData.discount}
+                       onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
                     />
                   </div>
                   <div className="form-group">
                     <label>Prep Time (mins)</label>
                     <input
-                      type="number"
-                      required
-                      className="form-input"
-                      value={formData.preparationTime}
-                      onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value })}
+                       type="number"
+                       required
+                       className="form-input"
+                       value={formData.preparationTime}
+                       onChange={(e) => setFormData({ ...formData, preparationTime: e.target.value })}
                     />
                   </div>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div className="form-group">
-                    <label>Category</label>
-                    <select
-                      required
-                      className="form-input"
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <label style={{ margin: 0 }}>Category</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowAddCategoryInline(!showAddCategoryInline)}
+                        style={{ padding: '2px', background: 'var(--primary)', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex' }}
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    {showAddCategoryInline ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#f8fafc', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input 
+                            autoFocus
+                            className="form-input" 
+                            placeholder="New Category..." 
+                            value={newInlineCategory}
+                            onChange={e => setNewInlineCategory(e.target.value)}
+                            onKeyDown={async e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newInlineCategory.trim() && !availableCategories.includes(newInlineCategory.trim())) {
+                                  const updated = [...availableCategories, newInlineCategory.trim()];
+                                  setAvailableCategories(updated);
+                                  setFormData(prev => ({ ...prev, category: newInlineCategory.trim() }));
+                                  setNewInlineCategory("");
+                                  setShowAddCategoryInline(false);
+                                  handleInlineMetadataUpdate('categories', updated);
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              if (newInlineCategory.trim() && !availableCategories.includes(newInlineCategory.trim())) {
+                                const updated = [...availableCategories, newInlineCategory.trim()];
+                                setAvailableCategories(updated);
+                                setFormData(prev => ({ ...prev, category: newInlineCategory.trim() }));
+                                setNewInlineCategory("");
+                                setShowAddCategoryInline(false);
+                                handleInlineMetadataUpdate('categories', updated);
+                              }
+                            }}
+                            style={{ background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Save size={16} />
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          {availableCategories.map(cat => (
+                            <span key={cat} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.6rem', background: 'white', color: '#1e1b4b', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, border: '1.5px solid #e2e8f0' }}>
+                              {cat}
+                              <X 
+                                size={12} 
+                                style={{ cursor: 'pointer', color: '#94a3b8' }} 
+                                onClick={() => {
+                                  const updated = availableCategories.filter(c => c !== cat);
+                                  setAvailableCategories(updated);
+                                  if (formData.category === cat) setFormData(prev => ({ ...prev, category: updated[0] || "" }));
+                                  handleInlineMetadataUpdate('categories', updated);
+                                }}
+                              />
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <select
+                        required
+                        className="form-input"
+                        value={formData.category}
+                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      >
+                        {availableCategories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <div className="form-group">
-                    <label>Dietary Type</label>
-                    <select
-                      required
-                      className="form-input"
-                      value={formData.dietaryType}
-                      onChange={(e) => setFormData({ ...formData, dietaryType: e.target.value as "Veg" | "Non-Veg" })}
-                    >
-                      <option value="Veg">Veg (Green)</option>
-                      <option value="Non-Veg">Non-Veg (Red)</option>
-                    </select>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <label style={{ margin: 0 }}>Dietary Type</label>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowAddDietaryInline(!showAddDietaryInline)}
+                        style={{ padding: '2px', background: '#22c55e', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', display: 'flex' }}
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                    {showAddDietaryInline ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#f0fdf4', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #bbf7d0' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <input 
+                            autoFocus
+                            className="form-input" 
+                            placeholder="e.g. Vegan..." 
+                            value={newInlineDietary}
+                            onChange={e => setNewInlineDietary(e.target.value)}
+                            onKeyDown={async e => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newInlineDietary.trim() && !availableDietaryTypes.includes(newInlineDietary.trim())) {
+                                  const updated = [...availableDietaryTypes, newInlineDietary.trim()];
+                                  setAvailableDietaryTypes(updated);
+                                  setFormData(prev => ({ ...prev, dietaryType: newInlineDietary.trim() }));
+                                  setNewInlineDietary("");
+                                  setShowAddDietaryInline(false);
+                                  handleInlineMetadataUpdate('dietaryTypes', updated);
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              if (newInlineDietary.trim() && !availableDietaryTypes.includes(newInlineDietary.trim())) {
+                                const updated = [...availableDietaryTypes, newInlineDietary.trim()];
+                                setAvailableDietaryTypes(updated);
+                                setFormData(prev => ({ ...prev, dietaryType: newInlineDietary.trim() }));
+                                setNewInlineDietary("");
+                                setShowAddDietaryInline(false);
+                                handleInlineMetadataUpdate('dietaryTypes', updated);
+                              }
+                            }}
+                            style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: '0.5rem', padding: '0 0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                          >
+                            <Save size={16} />
+                          </button>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+                          {availableDietaryTypes.map(type => (
+                            <span key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.25rem 0.6rem', background: 'white', color: '#166534', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, border: '1.5px solid #bbf7d0' }}>
+                              {type}
+                              <X 
+                                size={12} 
+                                style={{ cursor: 'pointer', color: '#86efac' }} 
+                                onClick={() => {
+                                  const updated = availableDietaryTypes.filter(t => t !== type);
+                                  setAvailableDietaryTypes(updated);
+                                  if (formData.dietaryType === type) setFormData(prev => ({ ...prev, dietaryType: updated[0] || "" }));
+                                  handleInlineMetadataUpdate('dietaryTypes', updated);
+                                }}
+                              />
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <select
+                        required
+                        className="form-input"
+                        value={formData.dietaryType}
+                        onChange={(e) => setFormData({ ...formData, dietaryType: e.target.value })}
+                      >
+                        {availableDietaryTypes.map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
                 <div className="form-group">

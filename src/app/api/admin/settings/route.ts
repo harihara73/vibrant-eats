@@ -16,14 +16,17 @@ function withDefaults(doc: any) {
   if (plain.deliveryRadiusKm == null) plain.deliveryRadiusKm = 5;
   if (plain.deliveryDiscount == null) plain.deliveryDiscount = 0;
 
-  // Handle deliveryCharges - now stored as plain Object
+  // Handle deliveryCharges
   if (!plain.deliveryCharges || typeof plain.deliveryCharges !== 'object') {
     plain.deliveryCharges = DEFAULT_DELIVERY_CHARGES;
-  } else if (plain.deliveryCharges instanceof Map) {
-    // Legacy cleanup if somehow still a Map
-    const obj: Record<string, number> = {};
-    plain.deliveryCharges.forEach((v: number, k: string) => { obj[k] = v; });
-    plain.deliveryCharges = obj;
+  }
+
+  if (plain.categories == null) {
+    plain.categories = ["Soups and Salads", "Appetizers / Starters", "Main Course / Entrées", "Sides / Accompaniments", "Desserts", "Beverages"];
+  }
+
+  if (plain.dietaryTypes == null) {
+    plain.dietaryTypes = ["Veg", "Non-Veg"];
   }
 
   return plain;
@@ -38,7 +41,6 @@ export async function GET() {
       settings = await Settings.create({ key: 'main_settings', isLive: true });
     }
     const result = withDefaults(settings);
-    console.log(`[Settings GET] restaurantLat=${result.restaurantLat}, restaurantLng=${result.restaurantLng}, radius=${result.deliveryRadiusKm}km`);
     return Response.json(result);
   } catch (error: any) {
     console.error('[Settings GET] Error:', error.message);
@@ -50,17 +52,13 @@ export async function GET() {
 export async function PATCH(req: Request) {
   const session = await auth();
   if (!session || (session.user as any).role !== "admin") {
-    console.warn('[Settings PATCH] Unauthorized attempt');
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const body = await req.json();
-    console.log(`[Settings PATCH] Saving:`, JSON.stringify(body));
-
     await connectDB();
 
-    // Use $set with explicit field mapping to avoid Mongoose strict-mode issues
     const updateFields: Record<string, any> = {};
     if (body.isLive !== undefined)           updateFields.isLive           = body.isLive;
     if (body.shutdownMessage !== undefined)  updateFields.shutdownMessage  = body.shutdownMessage;
@@ -70,8 +68,8 @@ export async function PATCH(req: Request) {
     if (body.deliveryRadiusKm !== undefined) updateFields.deliveryRadiusKm = Number(body.deliveryRadiusKm);
     if (body.deliveryDiscount !== undefined) updateFields.deliveryDiscount = Number(body.deliveryDiscount);
     if (body.deliveryCharges !== undefined)  updateFields.deliveryCharges  = body.deliveryCharges;
-
-    console.log(`[Settings PATCH] Update fields:`, JSON.stringify(updateFields));
+    if (body.categories !== undefined)       updateFields.categories       = body.categories;
+    if (body.dietaryTypes !== undefined)     updateFields.dietaryTypes     = body.dietaryTypes;
 
     const settings = await Settings.findOneAndUpdate(
       { key: 'main_settings' },
@@ -80,7 +78,6 @@ export async function PATCH(req: Request) {
     );
 
     const result = withDefaults(settings);
-    console.log(`[Settings PATCH] Saved OK. restaurantLat=${result.restaurantLat}, restaurantLng=${result.restaurantLng}`);
     return Response.json(result);
   } catch (error: any) {
     console.error('[Settings PATCH] Error:', error.message);

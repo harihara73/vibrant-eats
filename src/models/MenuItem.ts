@@ -9,7 +9,7 @@ const MenuItemSchema = new Schema({
   isAvailable: { type: Boolean, default: true },
   discount: { type: Number, default: 0 },
   preparationTime: { type: Number, default: 10 },
-  dietaryType: { type: String, enum: ['Veg', 'Non-Veg'], default: 'Veg' },
+  dietaryType: { type: String, default: 'Veg' },
 }, { timestamps: true, strict: false });
 
 const MenuItem = models.MenuItem || model('MenuItem', MenuItemSchema);

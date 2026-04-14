@@ -1,3 +1,7 @@
+import * as dotenv from "dotenv";
+import { resolve } from "path";
+dotenv.config({ path: resolve(process.cwd(), ".env.local") });
+
 import connectDB from "../lib/mongodb";
 import MenuItem from "../models/MenuItem";
 

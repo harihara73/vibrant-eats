@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   },
   // Adding this to allow dev server resources on the local network IP
   allowedDevOrigins: ['192.168.1.12', '192.168.1.12:3000'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  allowedDevOrigins: ['192.168.1.12', '192.168.1.12:3000'],
   typescript: {
     ignoreBuildErrors: true,
   },

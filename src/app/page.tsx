@@ -42,18 +42,9 @@ interface MenuItem {
   category: string;
   isAvailable: boolean;
   discount: number;
-  dietaryType: "Veg" | "Non-Veg";
+  dietaryType: string;
 }
 
-const CATEGORIES = [
-  "All",
-  "Soups and Salads",
-  "Appetizers / Starters",
-  "Main Course / Entrées",
-  "Sides / Accompaniments",
-  "Desserts",
-  "Beverages"
-];
 
 interface Location {
   lat: number;
@@ -80,6 +71,7 @@ export default function HomePage() {
   const [statusMessage, setStatusMessage] = useState("Restaurant Shutdown, come again");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isVegOnly, setIsVegOnly] = useState(false);
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
   const [restaurantCoords, setRestaurantCoords] = useState({ lat: 17.4348, lng: 82.2270 });
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState(5);
   const [deliveryInfo, setDeliveryInfo] = useState<{ distanceKm: number; minutes: number } | null>(null);
@@ -145,6 +137,7 @@ export default function HomePage() {
               setDeliveryCharges(parsed);
             }
             if (data.deliveryDiscount != null) setDeliveryDiscount(data.deliveryDiscount);
+            if (data.categories && data.categories.length > 0) setDynamicCategories(data.categories);
           } else {
             // Default to live if API fails or returns no data
             setIsRestaurantOpen(true);
@@ -157,12 +150,15 @@ export default function HomePage() {
 
       // Fetch Menu Items
       fetch("/api/menu")
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
         .then((data) => {
-          if (Array.isArray(data)) {
-            setItems(data);
-          } else {
-            setItems([]);
+          const menuItems = Array.isArray(data) ? data : [];
+          setItems(menuItems);
+          if (menuItems.length === 0) {
+            console.warn("Menu is empty or API returned invalid format");
           }
           setLoading(false);
         })
@@ -170,6 +166,10 @@ export default function HomePage() {
           console.error("Fetch error:", err);
           setItems([]);
           setLoading(false);
+          // Only show fatal error if it's the initial load
+          if (items.length === 0) {
+             setStatusMessage(`⚠️ Menu connection error: ${err.message}. Please check database status.`);
+          }
         });
     };
 
@@ -494,7 +494,7 @@ export default function HomePage() {
         {/* Category Navigation */}
         <div className="category-nav-wrapper">
           <div className="category-scroll">
-            {CATEGORIES.map(cat => (
+            {["All", ...dynamicCategories].map(cat => (
               <button 
                 key={cat} 
                 className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
@@ -522,7 +522,7 @@ export default function HomePage() {
               <p>Preparing the menu...</p>
             </div>
           ) : (
-            CATEGORIES.filter(cat => cat !== "All" && (selectedCategory === "All" || selectedCategory === cat)).map(category => {
+            dynamicCategories.filter(cat => selectedCategory === "All" || selectedCategory === cat).map(category => {
               const categoryItems = items
                 .filter(item => item.category === category)
                 .filter(item => !isVegOnly || item.dietaryType === "Veg")

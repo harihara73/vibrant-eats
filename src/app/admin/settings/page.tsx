@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import AdminSidebar from "@/components/AdminSidebar";
 import AdminMobileHeader from "@/components/AdminMobileHeader";
-import { MapPin, Save, Navigation, Loader2, CheckCircle2, AlertCircle, Package } from "lucide-react";
+import { MapPin, Save, Navigation, Loader2, CheckCircle2, AlertCircle, Package, X, UtensilsCrossed, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const MapPicker = dynamic(() => import("@/components/MapPicker"), {
@@ -39,7 +39,6 @@ export default function AdminSettingsPage() {
         if (data.restaurantLng) setRestaurantLng(data.restaurantLng);
         if (data.deliveryRadiusKm) setDeliveryRadiusKm(data.deliveryRadiusKm);
         if (data.deliveryDiscount != null) setDeliveryDiscount(data.deliveryDiscount);
-        // deliveryCharges is a Mongoose Map — comes as a plain object
         if (data.deliveryCharges) {
           const raw: Record<string, number> = typeof data.deliveryCharges === "object" ? data.deliveryCharges : {};
           const parsed: Record<number, number> = { ...DEFAULT_CHARGES };
@@ -64,7 +63,6 @@ export default function AdminSettingsPage() {
     setError("");
     setSaved(false);
     try {
-      // Convert charges to plain object with string keys for Mongoose Map
       const deliveryChargesObj: Record<string, number> = {};
       RADIUS_OPTIONS.forEach(r => { deliveryChargesObj[String(r)] = charges[r]; });
 
@@ -112,7 +110,7 @@ export default function AdminSettingsPage() {
               🏪 Restaurant & Delivery Settings
             </h1>
             <p style={{ color: "#64748b", fontWeight: 600, marginTop: "0.25rem" }}>
-              Configure restaurant location, delivery zones, and charges.
+              Configure restaurant location, delivery zones, categories and food types.
             </p>
           </div>
 
@@ -163,16 +161,13 @@ export default function AdminSettingsPage() {
                   lng={restaurantLng}
                   onChange={(lat, lng) => { setRestaurantLat(lat); setRestaurantLng(lng); }}
                 />
-                <p style={{ fontSize: "0.75rem", color: "#94a3b8", fontWeight: 600, marginTop: "0.5rem", textAlign: "center" }}>
-                  📌 Click on the map or drag the pin to set your restaurant location
-                </p>
               </div>
 
               {/* Delivery Zone Card */}
               <div style={cardStyle}>
                 <SectionTitle icon="🛵" label="Delivery Radius" />
                 <p style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, marginBottom: "1rem" }}>
-                  Select the maximum distance you want to accept orders from.
+                  Select the maximum distance for delivery.
                 </p>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.75rem" }}>
                   {RADIUS_OPTIONS.map(r => (
@@ -188,11 +183,9 @@ export default function AdminSettingsPage() {
                         fontWeight: 900,
                         fontSize: "1rem",
                         cursor: "pointer",
-                        transition: "all 0.2s",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        gap: "0.25rem",
                       }}
                     >
                       <span style={{ fontSize: "1.4rem" }}>{r} km</span>
@@ -205,20 +198,14 @@ export default function AdminSettingsPage() {
               {/* Delivery Charges Card */}
               <div style={cardStyle}>
                 <SectionTitle icon="💰" label="Delivery Charges per Zone" />
-                <p style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, marginBottom: "1rem" }}>
-                  Set base delivery charge for each distance tier. Customers are charged based on their distance from the restaurant.
-                </p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.75rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.75rem", marginTop: "1rem" }}>
                   {RADIUS_OPTIONS.map(r => (
                     <div key={r} style={{ background: "#f8fafc", borderRadius: "0.875rem", padding: "1rem 1.25rem", border: deliveryRadiusKm >= r ? "1.5px solid #c7d2fe" : "1.5px solid #e2e8f0", opacity: deliveryRadiusKm >= r ? 1 : 0.45 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-                        <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.9rem" }}>
-                          Up to {r} km
-                          {deliveryRadiusKm === r && <span style={{ marginLeft: "0.5rem", background: "#1e1b4b", color: "#fbbf24", fontSize: "0.6rem", fontWeight: 900, padding: "0.1rem 0.4rem", borderRadius: "0.3rem" }}>ACTIVE</span>}
-                        </span>
+                        <span style={{ fontWeight: 800, color: "#1e1b4b", fontSize: "0.9rem" }}>Up to {r} km</span>
                         {deliveryDiscount > 0 && (
                           <span style={{ fontSize: "0.7rem", background: "#dcfce7", color: "#166534", fontWeight: 900, padding: "0.15rem 0.4rem", borderRadius: "0.3rem" }}>
-                            {deliveryDiscount}% OFF → ₹{getEffectiveCharge(r)}
+                            ₹{getEffectiveCharge(r)}
                           </span>
                         )}
                       </div>
@@ -226,53 +213,39 @@ export default function AdminSettingsPage() {
                         <span style={{ fontSize: "1.2rem", color: "#64748b", fontWeight: 800 }}>₹</span>
                         <input
                           type="number"
-                          min={0}
                           value={charges[r] ?? DEFAULT_CHARGES[r]}
                           onChange={e => setCharges(prev => ({ ...prev, [r]: parseInt(e.target.value) || 0 }))}
-                          style={{ ...inputStyle, marginBottom: 0, width: "100%", fontSize: "1.1rem", fontWeight: 900 }}
+                          style={{ ...inputStyle, marginBottom: 0 }}
                         />
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-
-              {/* Delivery Discount Card */}
+                 {/* Delivery Discount Card */}
               <div style={cardStyle}>
                 <SectionTitle icon="🏷️" label="Delivery Charge Discount" />
-                <p style={{ fontSize: "0.8rem", color: "#64748b", fontWeight: 600, marginBottom: "1rem" }}>
-                  Apply a flat % discount on all delivery charges. Set to 0 for no discount. Great for promotions!
-                </p>
-                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-                  {[0, 10, 20, 25, 50, 100].map(d => (
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
+                  {[0, 10, 25, 50, 100].map(d => (
                     <button
                       key={d}
                       onClick={() => setDeliveryDiscount(d)}
                       style={{
-                        padding: "0.6rem 1.25rem",
+                        padding: "0.6rem 1rem",
                         borderRadius: "2rem",
-                        border: deliveryDiscount === d ? "2px solid #1e1b4b" : "2px solid #e2e8f0",
+                        border: deliveryRadiusKm === d ? "2px solid #1e1b4b" : "2px solid #e2e8f0",
                         background: deliveryDiscount === d ? "#1e1b4b" : "white",
                         color: deliveryDiscount === d ? "#fbbf24" : "#475569",
                         fontWeight: 800,
-                        fontSize: "0.875rem",
+                        fontSize: "0.8rem",
                         cursor: "pointer",
-                        transition: "all 0.2s",
                       }}
                     >
-                      {d === 0 ? "No Discount" : d === 100 ? "FREE 🎉" : `${d}% OFF`}
+                      {d === 0 ? "None" : d === 100 ? "FREE" : `${d}% OFF`}
                     </button>
                   ))}
-                </div>
-                {deliveryDiscount > 0 && (
-                  <div style={{ marginTop: "1rem", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "0.875rem", padding: "0.875rem 1rem" }}>
-                    <p style={{ margin: 0, fontWeight: 800, color: "#92400e", fontSize: "0.85rem" }}>
-                      💡 Preview: Customers pay{" "}
-                      {RADIUS_OPTIONS.map(r => `₹${getEffectiveCharge(r)} (${r}km)`).join(" · ")}
-                    </p>
-                  </div>
-                )}
               </div>
+            </div>
+          </div>
 
               {/* Status messages */}
               {error && (
@@ -295,7 +268,7 @@ export default function AdminSettingsPage() {
                   color: "#fbbf24",
                   border: "none",
                   borderRadius: "1.25rem",
-                  padding: "1.25rem 2rem",
+                  padding: "1.25rem",
                   fontWeight: 900,
                   fontSize: "1.1rem",
                   cursor: saving ? "not-allowed" : "pointer",
@@ -303,12 +276,9 @@ export default function AdminSettingsPage() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "0.75rem",
-                  boxShadow: "0 20px 40px -10px rgba(30,27,75,0.4)",
-                  opacity: saving ? 0.7 : 1,
-                  transition: "all 0.2s",
                 }}
               >
-                {saving ? <Loader2 size={22} style={{ animation: "spin 1s linear infinite" }} /> : <Save size={22} />}
+                {saving ? <Loader2 size={22} className="animate-spin" /> : <Save size={22} />}
                 {saving ? "Saving..." : "Save All Settings"}
               </button>
             </div>
@@ -316,27 +286,25 @@ export default function AdminSettingsPage() {
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
+      <style jsx>{`
         .admin-layout { display: flex; min-height: 100vh; background: #f8fafc; }
         .admin-main { flex: 1; overflow: auto; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────────
-
 function SectionTitle({ icon, label }: { icon: string; label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
       <span style={{ fontSize: "1.2rem" }}>{icon}</span>
-      <span style={{ fontSize: "1rem", fontWeight: 900, color: "#1e1b4b", letterSpacing: "-0.02em" }}>{label}</span>
+      <span style={{ fontSize: "1rem", fontWeight: 900, color: "#1e1b4b" }}>{label}</span>
     </div>
   );
 }
 
-// ─── Shared Styles ────────────────────────────────────────────────────────────────
 const cardStyle: React.CSSProperties = {
   background: "white",
   borderRadius: "1.5rem",
@@ -382,4 +350,28 @@ const ghostBtnStyle: React.CSSProperties = {
   fontWeight: 800,
   color: "#1e1b4b",
   cursor: "pointer",
+};
+
+const tagStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "0.5rem",
+  background: "#f1f5f9",
+  color: "#1e1b4b",
+  padding: "0.4rem 0.75rem",
+  borderRadius: "0.75rem",
+  fontSize: "0.85rem",
+  fontWeight: 800,
+  border: "1.5px solid #e2e8f0",
+};
+
+const tagDeleteStyle: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  padding: 0,
+  margin: 0,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  color: "#94a3b8",
 };
