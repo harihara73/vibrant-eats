@@ -22,7 +22,7 @@ import {
   PowerOff,
   Clock,
   Pencil,
-  Github
+  GitHub
 } from "lucide-react";
 import LoginModal from "@/components/LoginModal";
 import ProfileModal from "@/components/ProfileModal";
@@ -967,7 +967,7 @@ export default function HomePage() {
               <div className="footer-group">
                 <h4>Connect</h4>
                 <a href="https://github.com/harihara73/vibrant-eats" target="_blank" rel="noopener noreferrer" className="github-link-btn">
-                  <Github size={20} />
+                  <GitHub size={20} />
                   <span>View Source on GitHub</span>
                 </a>
               </div>
@@ -977,6 +977,7 @@ export default function HomePage() {
             <p>&copy; {new Date().getFullYear()} VibrantEats. Built with Excellence by harihara73.</p>
           </div>
         </footer>
+          </motion.div>
       </div>
 
       <style jsx>{`
