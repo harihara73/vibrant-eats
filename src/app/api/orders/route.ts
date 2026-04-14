@@ -34,10 +34,20 @@ export async function POST(req: Request) {
   // Public route for customers to place orders
   try {
     const data = await req.json();
+    console.log("--- New Order Attempt ---");
+    console.log("Payload:", JSON.stringify(data, null, 2));
+    
     await connectDB();
     const newOrder = await Order.create(data);
+    console.log("✅ Order Created Successfully ID:", newOrder._id);
+    
     return NextResponse.json(newOrder);
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+  } catch (error: any) {
+    console.error("❌ Order Creation Failed:", error);
+    return NextResponse.json({ 
+      error: "Failed to create order", 
+      details: error.message,
+      name: error.name
+    }, { status: 500 });
   }
 }

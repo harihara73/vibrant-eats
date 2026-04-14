@@ -90,6 +90,12 @@ export default function HomePage() {
     clearCart 
   } = useCart();
 
+  const cartMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    cart.forEach(item => { map[item._id] = item; });
+    return map;
+  }, [cart]);
+
   useEffect(() => {
     if (session?.user) {
         setCustomerInfo({ 
@@ -551,7 +557,7 @@ export default function HomePage() {
                   
                   <div className="customer-menu-grid">
                     {categoryItems.map(item => {
-                      const cartItem = cart.find(c => c._id === item._id);
+                      const cartItem = cartMap[item._id];
                       return (
                         <motion.div 
                           key={item._id} 
@@ -561,7 +567,7 @@ export default function HomePage() {
                           viewport={{ once: true }}
                         >
                           <div className="item-image">
-                            {item.image && <img src={item.image} alt={item.name} />}
+                             {item.image && <img src={item.image} alt={item.name} loading="lazy" />}
                             {item.discount > 0 && <span className="discount-tag">{item.discount}% OFF</span>}
                             <div className="dietary-badge" style={{ borderColor: item.dietaryType === 'Veg' ? '#22c55e' : '#ef4444' }}>
                               <div className="dietary-circle" style={{ backgroundColor: item.dietaryType === 'Veg' ? '#22c55e' : '#ef4444' }} />
@@ -1494,6 +1500,28 @@ export default function HomePage() {
         }
         .customer-menu-card:hover .item-image img {
           transform: scale(1.1);
+        }
+        
+        .discount-tag {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          background: #ef4444;
+          color: white;
+          padding: 0.35rem 0.75rem;
+          border-radius: 0.75rem;
+          font-weight: 900;
+          font-size: 0.8rem;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+          z-index: 5;
+          letter-spacing: 0.02em;
+          border: 1px solid rgba(255,255,255,0.2);
+          animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
         }
         
         .item-info { 

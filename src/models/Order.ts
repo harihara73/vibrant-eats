@@ -19,6 +19,7 @@ const OrderSchema = new Schema({
   },
   items: [OrderItemSchema],
   subtotal: { type: Number, required: true },
+  deliveryCharge: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   total: { type: Number, required: true },
   status: { 
