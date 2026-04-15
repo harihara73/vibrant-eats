@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/CartContext";
 import PWAInstall from "@/components/PWAInstall";
+ import TopInstallButton from "@/components/TopInstallButton";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -35,12 +36,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Early PWA Event Capture Script */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA: Early prompt captured');
+            e.preventDefault();
+            window.pwa_prompt = e;
+          });
+        `}} />
+      </head>
       <body className={outfit.className} suppressHydrationWarning>
         <SessionProvider>
           <PWAProvider>
             <CartProvider>
               {children}
-              <PWAInstall />
+               <PWAInstall />
             </CartProvider>
           </PWAProvider>
         </SessionProvider>

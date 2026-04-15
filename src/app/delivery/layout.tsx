@@ -3,7 +3,7 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "VibrantEats Delivery | Partner Portal",
   description: "Manage your delivery tasks effortlessly.",
-  manifest: "/delivery-manifest.json",
+  manifest: "/ve-delivery.json",
 };
 
 export default function DeliveryLayout({

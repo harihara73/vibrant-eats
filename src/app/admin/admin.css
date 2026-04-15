@@ -795,6 +795,46 @@ textarea.form-input {
   align-items: center;
 }
 
+
+/* PWA Install Button - Premium Design */
+.ve-pwa-install-pill {
+  background-color: #1e1b4b !important;
+  color: white !important;
+  border: 1px solid rgba(251, 191, 36, 0.5) !important;
+  padding: 0.8rem 1.25rem !important;
+  border-radius: 1rem !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.75rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  width: 100% !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  margin: 0.5rem 0 !important;
+  text-decoration: none !important;
+}
+
+.ve-pwa-install-pill:hover {
+  background-color: #fbbf24 !important;
+  color: #1e1b4b !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 15px 30px rgba(251, 191, 36, 0.25) !important;
+  border-color: #fbbf24 !important;
+}
+
+.ve-pwa-install-pill svg {
+  color: #fbbf24 !important;
+}
+
+.ve-pwa-install-pill:hover svg {
+  color: #1e1b4b !important;
+}
+
 .customer-info-main {
   display: flex;
   align-items: center;

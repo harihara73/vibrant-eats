@@ -3,6 +3,8 @@
   "short_name": "VibrantEats",
   "description": "Premium Gourmet Food Delivery",
   "start_url": "/",
+  "id": "ve-customer",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e1b4b",

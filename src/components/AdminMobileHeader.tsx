@@ -3,6 +3,7 @@
 import { Menu, X, Power, PowerOff, Loader2 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
 import Link from "next/link";
+import TopInstallButton from "./TopInstallButton";
 
 export default function AdminMobileHeader({ title }: { title?: string }) {
   const { toggleSidebar, isSidebarOpen, isLive, toggleLiveStatus, statusLoading, hasExpiredTimers } = useAdmin();
@@ -36,7 +37,8 @@ export default function AdminMobileHeader({ title }: { title?: string }) {
         </Link>
       </div>
       
-      <div className="mobile-header-right">
+      <div className="mobile-header-right" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <TopInstallButton />
         <button 
           className={`status-toggle-btn ${isLive ? 'live' : 'shutdown'}`}
           onClick={toggleLiveStatus}

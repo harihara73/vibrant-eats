@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="admin-layout">
       <AdminSidebar />
-      <div className="admin-main">
+      <main className="main-content">
         <AdminMobileHeader title="Delivery Settings" />
 
         <div style={{ padding: "2rem", maxWidth: 900, margin: "0 auto" }}>
@@ -284,11 +284,9 @@ export default function AdminSettingsPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       <style jsx>{`
-        .admin-layout { display: flex; min-height: 100vh; background: #f8fafc; }
-        .admin-main { flex: 1; overflow: auto; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>

@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Loader2, ShieldCheck, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import TopInstallButton from "@/components/TopInstallButton";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -51,6 +52,9 @@ export default function LoginPage() {
       </div>
 
       <div className="auth-stage">
+        <div style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 50 }}>
+          <TopInstallButton />
+        </div>
         <motion.div 
           initial={{ opacity: 0, y: 40, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

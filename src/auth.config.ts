@@ -8,9 +8,11 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isAdminPage = nextUrl.pathname.startsWith("/admin");
-      const isAuthPage = nextUrl.pathname.startsWith("/admin/login");
-
+      if (nextUrl.pathname.endsWith(".json")) return true;
+      
+      const isAdminPage = nextUrl.pathname.startsWith("/admin/") || nextUrl.pathname === "/admin";
+      const isAuthPage = nextUrl.pathname === "/admin/login";
+ 
       if (isAdminPage && !isAuthPage && !isLoggedIn) {
         return false; // Redirect to login
       }

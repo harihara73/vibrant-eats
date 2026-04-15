@@ -1,8 +1,10 @@
 {
-  "name": "VibrantEats Delivery",
-  "short_name": "VE Delivery",
-  "description": "Delivery partner companion app",
-  "start_url": "/delivery",
+  "name": "VibrantEats Admin",
+  "short_name": "VE Admin",
+  "description": "Manage your restaurant operations",
+  "start_url": "/admin/dashboard",
+  "id": "ve-admin",
+  "scope": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e1b4b",
@@ -15,6 +17,5 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["food", "logistics"],
-  "scope": "/delivery"
+  "categories": ["business", "productivity"]
 }

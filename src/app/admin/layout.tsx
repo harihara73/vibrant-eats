@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "VibrantEats Admin | Manager Portal",
   description: "Manage your restaurant operations with ease.",
-  manifest: "/admin-manifest.json",
+  manifest: "/ve-admin.json",
 };
 
 export default function AdminLayout({

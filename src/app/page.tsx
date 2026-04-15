@@ -319,7 +319,7 @@ export default function HomePage() {
         <div className="nav-logo">Vibrant<span>Eats</span></div>
         <div className="nav-actions">
           {session ? (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <TopInstallButton />
               <div className="account-pill">
                 <span className="user-name">{session?.user?.name?.split(' ')[0] || "User"}</span>
@@ -347,7 +347,7 @@ export default function HomePage() {
                   </button>
                 </div>
               </div>
-            </>
+            </div>
           ) : (
             <div className="nav-guest-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <TopInstallButton />
