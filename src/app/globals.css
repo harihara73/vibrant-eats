@@ -328,7 +328,54 @@ input, textarea {
   .cart-bar-btn { padding: 0.45rem 0.75rem !important; font-size: 0.78rem !important; }
 }
 
+
 @media (max-width: 380px) {
   .cart-bar-label { display: none; }
   .cart-bar-price { font-size: 0.95rem; }
+}
+
+/* ============================================================
+   CUSTOMER PWA INSTALL BUTTON — Global
+   ============================================================ */
+.nav-install-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  height: fit-content;
+  align-self: center;
+  border: 2px solid transparent;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.customer-theme {
+  background: #fbbf24 !important;
+  color: #1e1b4b !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.customer-theme:hover {
+  background: #f59e0b !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2) !important;
+}
+
+@media (max-width: 768px) {
+  .install-btn-text {
+    display: none;
+  }
+  .nav-install-btn {
+    padding: 0.5rem;
+    min-width: 36px;
+    justify-content: center;
+  }
 }

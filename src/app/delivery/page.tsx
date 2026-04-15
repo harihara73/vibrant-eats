@@ -517,11 +517,6 @@
            onClose={() => setShowRouteFor(null)}
          />
        )}
- 
-       {/* Bottom Install App Trigger */}
-       <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center' }}>
-         <BottomInstallButton appName="Delivery" />
-       </div>
      </div>
    );
  }
