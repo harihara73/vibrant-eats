@@ -2,7 +2,7 @@ import mongoose, { Schema, model, models } from 'mongoose';
 
 const UserSchema = new Schema({
   name: { type: String, required: true },
-  phone: { type: String, unique: true, sparse: true },
+  phone: { type: String, sparse: true },
   email: { type: String, unique: true, sparse: true },
   addresses: [{ 
     doorNo: { type: String },
