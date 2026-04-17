@@ -348,13 +348,9 @@ export default function OrdersPage() {
                           )}
 
                           {order.status === 'out-for-delivery' && (
-                            <button 
-                              className="btn-primary" 
-                              style={{ gridColumn: '1 / -1', fontSize: '0.8rem', padding: '0.625rem', background: '#10b981' }}
-                              onClick={() => updateStatus(order._id, 'delivered')}
-                            >
-                              <CheckCircle2 size={16} style={{ marginRight: '0.4rem' }} /> Mark Delivered
-                            </button>
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                              <Truck size={16} style={{ display: 'inline', marginRight: '0.4rem' }} /> Out for Delivery
+                            </div>
                           )}
                         </div>
                       </div>
@@ -518,13 +514,9 @@ export default function OrdersPage() {
                   )}
 
                   {order.status === 'out-for-delivery' && (
-                    <button 
-                      className="btn-primary" 
-                      style={{ gridColumn: '1 / -1', fontSize: '0.8rem', padding: '0.625rem', background: '#10b981' }}
-                      onClick={() => updateStatus(order._id, 'delivered')}
-                    >
-                      <CheckCircle2 size={16} style={{ marginRight: '0.4rem' }} /> Mark Delivered
-                    </button>
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                      <Truck size={16} style={{ display: 'inline', marginRight: '0.4rem' }} /> Out for Delivery
+                    </div>
                   )}
                 </div>
               </div>
