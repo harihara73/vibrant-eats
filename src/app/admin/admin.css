@@ -899,9 +899,6 @@ textarea.form-input {
   border-color: var(--primary-glow);
 }
 
-  }
-}
-
 /* DELETE ORDER UI STYLES */
 .delete-action-btn {
   background: white;

@@ -18,7 +18,9 @@
    RefreshCw,
    Navigation,
    Trophy,
-   Map as MapIcon
+   Map as MapIcon,
+   ShieldCheck,
+   AlertTriangle
  } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
  import { signOut, useSession } from "next-auth/react";
@@ -62,6 +64,8 @@
    // Route Map State
    const [settings, setSettings] = useState<any>(null);
    const [showRouteFor, setShowRouteFor] = useState<Order | null>(null);
+   const [otpModalOrder, setOtpModalOrder] = useState<Order | null>(null);
+   const [otpValue, setOtpValue] = useState("");
  
    useEffect(() => {
      fetchSettings();
@@ -485,13 +489,8 @@
                            className="action-btn btn-deliver"
                            disabled={updatingId === order._id}
                            onClick={() => {
-                             const code = window.prompt("Enter 4-digit Delivery Confirmation Code from customer:");
-                             if (code === null) return; // Cancelled
-                             if (!code || code.length !== 4) {
-                                 alert("Please enter a valid 4-digit code.");
-                                 return;
-                             }
-                             handleStatusUpdate(order._id, 'delivered', { verificationCode: code });
+                             setOtpModalOrder(order);
+                             setOtpValue("");
                            }}
                          >
                            {updatingId === order._id ? <Loader2 className="animate-spin" size={20} /> : <><CheckCircle2 size={20} /> DONE</>}
@@ -523,6 +522,130 @@
            onClose={() => setShowRouteFor(null)}
          />
        )}
+
+       {/* OTP Verification Modal */}
+       <AnimatePresence>
+         {otpModalOrder && (
+           <motion.div 
+             initial={{ opacity: 0 }}
+             animate={{ opacity: 1 }}
+             exit={{ opacity: 0 }}
+             className="otp-modal-overlay"
+             style={{
+               position: 'fixed',
+               inset: 0,
+               background: 'rgba(0,0,0,0.85)',
+               backdropFilter: 'blur(8px)',
+               zIndex: 3000,
+               display: 'flex',
+               alignItems: 'flex-end', // Good for mobile-first thumb reach
+               justifyContent: 'center',
+               padding: '0'
+             }}
+             onClick={() => setOtpModalOrder(null)}
+           >
+             <motion.div 
+               initial={{ y: "100%" }}
+               animate={{ y: 0 }}
+               exit={{ y: "100%" }}
+               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+               className="otp-modal-content"
+               style={{
+                 background: 'white',
+                 width: '100%',
+                 maxWidth: '500px',
+                 borderRadius: '2rem 2rem 0 0',
+                 padding: '2.5rem 1.5rem 3rem',
+                 textAlign: 'center',
+                 boxShadow: '0 -20px 25px -5px rgba(0,0,0,0.1)'
+               }}
+               onClick={e => e.stopPropagation()}
+             >
+               <div style={{
+                 width: '72px',
+                 height: '72px',
+                 background: '#f0f9ff',
+                 borderRadius: '1.5rem',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 margin: '0 auto 1.5rem',
+                 color: '#0369a1'
+               }}>
+                 <ShieldCheck size={40} />
+               </div>
+
+               <h2 style={{ fontSize: '1.5rem', fontWeight: 950, color: 'var(--secondary)', marginBottom: '0.5rem' }}>Secure Completion</h2>
+               <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.5 }}>
+                 Ask <span style={{ color: 'var(--secondary)', fontWeight: 900 }}>{otpModalOrder.customerName}</span> for the 4-digit code shown on their tracking screen.
+               </p>
+
+               <div className="otp-input-area" style={{ marginBottom: '2.5rem' }}>
+                 <input 
+                   type="text" 
+                   maxLength={4}
+                   inputMode="numeric"
+                   placeholder="0000"
+                   value={otpValue}
+                   onChange={(e) => {
+                     const val = e.target.value.replace(/\D/g, '');
+                     setOtpValue(val);
+                   }}
+                   style={{
+                     width: '100%',
+                     maxWidth: '220px',
+                     height: '74px',
+                     fontSize: '3rem',
+                     fontWeight: 900,
+                     textAlign: 'center',
+                     letterSpacing: '0.5rem',
+                     border: '3px solid #e2e8f0',
+                     borderRadius: '1.5rem',
+                     background: '#f8fafc',
+                     color: 'var(--secondary)',
+                     outline: 'none',
+                     transition: 'all 0.2s',
+                   }}
+                   autoFocus
+                 />
+                 <div style={{ marginTop: '1rem', color: otpValue.length === 4 ? '#10b981' : '#64748b', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                   {otpValue.length === 4 ? "Code Ready" : "Enter 4-Digit Code"}
+                 </div>
+               </div>
+
+               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+                 <button 
+                   className="action-btn btn-deliver"
+                   style={{ 
+                     padding: '1.25rem', 
+                     height: 'auto', 
+                     fontSize: '1.1rem', 
+                     background: otpValue.length === 4 ? '#10b981' : '#cbd5e1', 
+                     opacity: otpValue.length === 4 ? 1 : 0.7,
+                     cursor: otpValue.length === 4 ? 'pointer' : 'not-allowed'
+                   }}
+                   disabled={otpValue.length !== 4 || updatingId === otpModalOrder._id}
+                   onClick={() => {
+                     if (otpModalOrder) {
+                       handleStatusUpdate(otpModalOrder._id, 'delivered', { verificationCode: otpValue });
+                       setOtpModalOrder(null);
+                     }
+                   }}
+                 >
+                   {updatingId === otpModalOrder._id ? <Loader2 className="animate-spin" size={24} /> : "Verify & Complete Delivery"}
+                 </button>
+                 <button 
+                   className="action-btn"
+                   style={{ background: 'transparent', color: 'var(--text-muted)', fontSize: '0.9rem', padding: '0.5rem', border: 'none' }}
+                   onClick={() => setOtpModalOrder(null)}
+                 >
+                   Nevermind, take me back
+                 </button>
+               </div>
+             </motion.div>
+           </motion.div>
+         )}
+       </AnimatePresence>
      </div>
    );
  }

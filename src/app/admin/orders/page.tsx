@@ -287,8 +287,9 @@ export default function OrdersPage() {
                             )}
                           </div>
                         </div>
+                      </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text-main)' }}>
                             <MapPin size={14} className="text-muted" />
                             <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{order.address}</span>
@@ -375,7 +376,6 @@ export default function OrdersPage() {
                                </select>
                             </div>
                           )}
-
                           {order.status === 'out-for-delivery' && (
                             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
                               <Truck size={16} style={{ display: 'inline', marginRight: '0.4rem' }} /> Out for Delivery
@@ -578,8 +578,9 @@ export default function OrdersPage() {
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Single Deletion Overlay */}
+              {/* Single Deletion Overlay */}
                 <AnimatePresence>
                   {deletingOrderId === order._id && (
                     <motion.div 
@@ -667,7 +668,7 @@ export default function OrdersPage() {
                 
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--secondary)', marginBottom: '0.5rem' }}>Confirm Assignment</h2>
                 <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginBottom: '2rem', lineHeight: 1.5 }}>
-                  Are you sure you want to assign this order to <span style={{ color: '#4f46e5', fontWeight: 900 }}>{assignmentConfig.memberName}</span>? 
+                  Are you sure you want to assign this order to <span style={{ color: '#4f46e5', fontWeight: 900 }}>{assignmentConfig?.memberName}</span>? 
                   They will be notified immediately.
                 </p>
 
@@ -676,11 +677,13 @@ export default function OrdersPage() {
                     className="btn-primary" 
                     style={{ background: 'linear-gradient(to right, #4f46e5, #3b82f6)', border: 'none', padding: '1rem', height: 'auto', fontSize: '1rem' }}
                     onClick={() => {
-                      updateStatus(assignmentConfig.orderId, 'ready-to-pickup', { 
-                        deliveryBoyId: assignmentConfig.memberId, 
-                        deliveryBoyName: assignmentConfig.memberName 
-                      });
-                      setAssignmentConfig(null);
+                      if (assignmentConfig) {
+                        updateStatus(assignmentConfig.orderId, 'ready-to-pickup', { 
+                          deliveryBoyId: assignmentConfig.memberId, 
+                          deliveryBoyName: assignmentConfig.memberName 
+                        });
+                        setAssignmentConfig(null);
+                      }
                     }}
                   >
                     Confirm Assignment
