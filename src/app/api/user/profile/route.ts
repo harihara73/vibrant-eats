@@ -42,6 +42,15 @@ export async function PATCH(req: Request) {
     });
   } catch (error: any) {
     console.error("Profile Update Error:", error);
+    
+    // Handle MongoDB Duplicate Key Error (Code 11000)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return NextResponse.json({ 
+        error: `This ${field} is already linked to another account.` 
+      }, { status: 400 });
+    }
+
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }
