@@ -14,6 +14,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   callbacks: {
     ...authConfig.callbacks,
+    async jwt({ token, user, account }) {
+      // First time login (user object is present)
+      if (user) {
+        try {
+          await connectDB();
+          const dbUser = await User.findOne({ email: user.email });
+          if (dbUser) {
+            token.sub = dbUser._id.toString(); // Use MongoDB ID as the session ID
+            token.role = dbUser.role;
+            token.phone = dbUser.phone;
+            token.addresses = dbUser.addresses || [];
+          }
+        } catch (err) {
+          console.error("[AUTH] JWT Sync Error:", err);
+        }
+      }
+      return token;
+    },
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
         try {
