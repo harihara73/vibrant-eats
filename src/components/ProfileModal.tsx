@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { X, User, Mail, MapPin, Plus, Trash2, Loader2, CheckCircle2, ShieldCheck, Settings, Navigation, Home, Hash, Locate, Compass, Pencil } from "lucide-react";
+import { X, User, Mail, Phone, MapPin, Plus, Trash2, Loader2, CheckCircle2, ShieldCheck, Settings, Navigation, Home, Hash, Locate, Compass, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
@@ -25,6 +25,7 @@ export default function ProfileModal({ isOpen, onClose, initialEditIndex = null 
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [addresses, setAddresses] = useState<any[]>([]);
   const [doorNo, setDoorNo] = useState("");
   const [addressLine, setAddressLine] = useState("");
@@ -41,6 +42,7 @@ export default function ProfileModal({ isOpen, onClose, initialEditIndex = null 
     if (session?.user) {
       setName(session.user.name || "");
       setEmail(session.user.email || "");
+      setPhone((session.user as any).phone || "");
       const savedAddresses = (session.user as any).addresses || [];
       const formatted = savedAddresses.map((addr: any) => 
         typeof addr === 'string' ? { text: addr, lat: null, lng: null } : addr
@@ -193,11 +195,11 @@ export default function ProfileModal({ isOpen, onClose, initialEditIndex = null 
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, addresses: currentAddresses }),
+        body: JSON.stringify({ name, phone, addresses: currentAddresses }),
       });
 
       if (res.ok) {
-        await update({ name, email, addresses: currentAddresses });
+        await update({ name, phone, addresses: currentAddresses });
         setSuccess(true);
         setTimeout(() => {
           setSuccess(false);
@@ -281,7 +283,11 @@ export default function ProfileModal({ isOpen, onClose, initialEditIndex = null 
                   </div>
                   <div className="v3-mini-input-group">
                     <Mail size={16} />
-                    <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} />
+                    <input type="email" placeholder="Email Address" value={email} readOnly style={{ opacity: 0.6, cursor: 'not-allowed' }} />
+                  </div>
+                  <div className="v3-mini-input-group">
+                    <Phone size={16} />
+                    <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} />
                   </div>
                 </div>
               </section>
