@@ -14,7 +14,9 @@ import {
   Truck,
   ExternalLink,
   Play,
-  Loader2
+  Loader2,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import OrderSimulator from "@/components/OrderSimulator";
@@ -53,6 +55,7 @@ export default function OrdersPage() {
     memberId: string; 
     memberName: string;
   } | null>(null);
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   const { dismissNotification, expiredOrderIds, markOrderAsExpired, clearExpiredOrder } = useAdmin();
 
   // Helper to calculate prep time based on items
@@ -127,6 +130,24 @@ export default function OrdersPage() {
       fetchOrders();
     } catch (err) {
       console.error("Failed to update status");
+    }
+  };
+
+  const handleDeleteOrder = async (id: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setOrders(prev => prev.filter(o => o._id !== id));
+        setDeletingOrderId(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to delete order");
+      }
+    } catch (err) {
+      console.error("Deletion error:", err);
+      alert("Network error occurred.");
     }
   };
 
@@ -226,7 +247,15 @@ export default function OrdersPage() {
                                 </div>
                             </div>
                           </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <button 
+                              className="delete-action-btn"
+                              onClick={() => setDeletingOrderId(order._id)}
+                              title="Delete Fake Order"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
                             <div 
                               style={{ 
                                 fontSize: '0.7rem', 
@@ -356,6 +385,28 @@ export default function OrdersPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Nested Deletion Overlay */}
+                  <AnimatePresence>
+                    {customerOrders.some(o => o._id === deletingOrderId) && (
+                      <motion.div 
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }} 
+                        exit={{ opacity: 0 }}
+                        className="delete-confirmation-overlay"
+                      >
+                         <div className="confirm-box">
+                            <AlertTriangle size={32} color="#dc2626" />
+                            <h3>Delete Fake Order?</h3>
+                            <p>This will permanently remove this order from your dashboard.</p>
+                            <div className="confirm-actions">
+                               <button className="confirm-btn delete" onClick={() => deletingOrderId && handleDeleteOrder(deletingOrderId)}>Delete Permanently</button>
+                               <button className="confirm-btn cancel" onClick={() => setDeletingOrderId(null)}>Nevermind</button>
+                            </div>
+                         </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             }
@@ -378,7 +429,15 @@ export default function OrdersPage() {
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ID: {order._id.slice(-6)}</div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <button 
+                      className="delete-action-btn"
+                      onClick={() => setDeletingOrderId(order._id)}
+                      title="Delete Fake Order"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
                     <div 
                       style={{ 
                         fontSize: '0.7rem', 
@@ -519,6 +578,28 @@ export default function OrdersPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Single Deletion Overlay */}
+                <AnimatePresence>
+                  {deletingOrderId === order._id && (
+                    <motion.div 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      exit={{ opacity: 0 }}
+                      className="delete-confirmation-overlay"
+                    >
+                       <div className="confirm-box">
+                          <AlertTriangle size={32} color="#dc2626" />
+                          <h3>Delete Fake Order?</h3>
+                          <p>This will permanently remove this order from your dashboard.</p>
+                          <div className="confirm-actions">
+                             <button className="confirm-btn delete" onClick={() => handleDeleteOrder(order._id)}>Delete Permanently</button>
+                             <button className="confirm-btn cancel" onClick={() => setDeletingOrderId(null)}>Nevermind</button>
+                          </div>
+                       </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}

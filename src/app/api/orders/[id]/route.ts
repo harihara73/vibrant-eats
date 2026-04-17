@@ -105,3 +105,33 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  const user = session?.user as any;
+  if (!session || user.role !== "admin") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Invalid Order ID" }, { status: 400 });
+    }
+    
+    await connectDB();
+    const deletedOrder = await Order.findByIdAndDelete(id);
+    
+    if (!deletedOrder) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Order deletion error:", error);
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+  }
+}
