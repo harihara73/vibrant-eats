@@ -27,6 +27,7 @@ interface Order {
   acceptedAt?: string;
   preparingAt?: string;
   outForDeliveryAt?: string;
+  deliveryCode?: string;
 }
 
 export default function OrderTrackingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -191,6 +192,28 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
           </div>
         </motion.div>
 
+        {/* Delivery OTP Card */}
+        {order.status !== 'delivered' && order.deliveryCode && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="otp-highlight-card"
+          >
+            <div className="otp-content">
+              <div className="otp-left">
+                <PackageCheck size={32} color="var(--primary)" />
+                <div>
+                  <h4>Delivery Confirmation Code</h4>
+                  <p>Share this code with the partner to receive your order</p>
+                </div>
+              </div>
+              <div className="otp-code-box">
+                {order.deliveryCode}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <div className="order-details-grid">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -277,6 +300,51 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
           margin-bottom: 2rem;
           text-align: center;
         }
+
+        .otp-highlight-card {
+          background: linear-gradient(135deg, #1e1b4b, #312e81);
+          padding: 1.5rem 2rem;
+          border-radius: 1.5rem;
+          margin-bottom: 2rem;
+          color: white;
+          box-shadow: 0 20px 25px -5px rgba(30, 27, 75, 0.2);
+        }
+        .otp-content {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1.5rem;
+        }
+        .otp-left {
+          display: flex;
+          align-items: center;
+          gap: 1.25rem;
+          text-align: left;
+        }
+        .otp-left h4 { 
+          margin: 0; 
+          font-size: 1.1rem; 
+          font-weight: 800; 
+          color: #fbbf24;
+        }
+        .otp-left p { 
+          margin: 0.25rem 0 0; 
+          font-size: 0.85rem; 
+          opacity: 0.8; 
+          font-weight: 500;
+        }
+        .otp-code-box {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 0.75rem 1.5rem;
+          border-radius: 1rem;
+          font-size: 1.75rem;
+          font-weight: 900;
+          letter-spacing: 0.2em;
+          color: #fbbf24;
+          backdrop-filter: blur(10px);
+        }
+
         .status-header {
           display: flex;
           justify-content: space-between;

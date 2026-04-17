@@ -39,12 +39,23 @@ export async function PATCH(
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid Order ID" }, { status: 400 });
     }
-    const { status, deliveryBoyId, deliveryBoyName } = await req.json();
+    const { status, deliveryBoyId, deliveryBoyName, verificationCode } = await req.json();
     await connectDB();
 
     const existingOrder = await Order.findById(id);
     if (!existingOrder) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // NEW: Verification Code Check
+    if (status === 'delivered') {
+      if (!verificationCode) {
+        return NextResponse.json({ error: "Delivery confirmation code is required to complete this order." }, { status: 400 });
+      }
+      
+      if (existingOrder.deliveryCode && verificationCode !== existingOrder.deliveryCode) {
+        return NextResponse.json({ error: "Invalid delivery confirmation code. Please ask the customer for the correct code." }, { status: 400 });
+      }
     }
 
     // SECURITY CHECK: If delivery boy is updating, ensure they own the order

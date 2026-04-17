@@ -486,7 +486,15 @@
                          <button 
                            className="action-btn btn-deliver"
                            disabled={updatingId === order._id}
-                           onClick={() => handleStatusUpdate(order._id, 'delivered')}
+                           onClick={() => {
+                             const code = window.prompt("Enter 4-digit Delivery Confirmation Code from customer:");
+                             if (code === null) return; // Cancelled
+                             if (!code || code.length !== 4) {
+                                 alert("Please enter a valid 4-digit code.");
+                                 return;
+                             }
+                             handleStatusUpdate(order._id, 'delivered', { verificationCode: code });
+                           }}
                          >
                            {updatingId === order._id ? <Loader2 className="animate-spin" size={20} /> : <><CheckCircle2 size={20} /> DONE</>}
                          </button>

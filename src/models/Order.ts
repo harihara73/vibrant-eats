@@ -36,6 +36,7 @@ const OrderSchema = new Schema({
   deliveredAt: { type: Date },
   deliveryBoyId: { type: Schema.Types.ObjectId, ref: 'User' },
   deliveryBoyName: { type: String },
+  deliveryCode: { type: String },
 }, { timestamps: true });
 
 const Order = models.Order || model('Order', OrderSchema);

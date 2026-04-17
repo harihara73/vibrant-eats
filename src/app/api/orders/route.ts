@@ -38,8 +38,13 @@ export async function POST(req: Request) {
     console.log("Payload:", JSON.stringify(data, null, 2));
     
     await connectDB();
-    const newOrder = await Order.create(data);
-    console.log("✅ Order Created Successfully ID:", newOrder._id);
+    
+    // Generate 4-digit numeric delivery code
+    const deliveryCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const orderData = { ...data, deliveryCode };
+    
+    const newOrder = await Order.create(orderData);
+    console.log("✅ Order Created Successfully ID:", newOrder._id, "Code:", deliveryCode);
     
     return NextResponse.json(newOrder);
   } catch (error: any) {
