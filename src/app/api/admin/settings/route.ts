@@ -13,6 +13,7 @@ function withDefaults(doc: any) {
   if (plain.restaurantLat == null)    plain.restaurantLat    = 17.4348;
   if (plain.restaurantLng == null)    plain.restaurantLng    = 82.2270;
   if (plain.restaurantName == null)   plain.restaurantName   = 'VibrantEats Restaurant';
+  if (plain.restaurantPhone == null)  plain.restaurantPhone  = '+91 70933 29278';
   if (plain.deliveryRadiusKm == null) plain.deliveryRadiusKm = 5;
   if (plain.deliveryDiscount == null) plain.deliveryDiscount = 0;
 
@@ -65,6 +66,7 @@ export async function PATCH(req: Request) {
     if (body.restaurantLat !== undefined)    updateFields.restaurantLat    = Number(body.restaurantLat);
     if (body.restaurantLng !== undefined)    updateFields.restaurantLng    = Number(body.restaurantLng);
     if (body.restaurantName !== undefined)   updateFields.restaurantName   = body.restaurantName;
+    if (body.restaurantPhone !== undefined)  updateFields.restaurantPhone  = body.restaurantPhone;
     if (body.deliveryRadiusKm !== undefined) updateFields.deliveryRadiusKm = Number(body.deliveryRadiusKm);
     if (body.deliveryDiscount !== undefined) updateFields.deliveryDiscount = Number(body.deliveryDiscount);
     if (body.deliveryCharges !== undefined)  updateFields.deliveryCharges  = body.deliveryCharges;

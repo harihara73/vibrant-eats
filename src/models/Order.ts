@@ -24,11 +24,12 @@ const OrderSchema = new Schema({
   total: { type: Number, required: true },
   status: { 
     type: String, 
-    enum: ['pending', 'accepted', 'rejected', 'preparing', 'ready-to-pickup', 'out-for-delivery', 'delivered'], 
+    enum: ['pending', 'accepted', 'rejected', 'preparing', 'ready-to-pickup', 'out-for-delivery', 'delivered', 'cancelled'], 
     default: 'pending' 
   },
   paymentStatus: { type: String, default: 'pending' },
   paymentMethod: { type: String, default: 'COD' },
+  cancellationReason: { type: String },
   acceptedAt: { type: Date },
   preparingAt: { type: Date },
   readyAt: { type: Date },

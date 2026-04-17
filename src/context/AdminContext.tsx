@@ -96,9 +96,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           } else if (o.status === 'preparing' && o.preparingAt) {
             const prepTimeMs = getOrderPrepTime(o) * 60000;
             isOverdue = (now - new Date(o.preparingAt).getTime()) > prepTimeMs;
-          } else if (o.status === 'out-for-delivery' && o.outForDeliveryAt) {
-            // Delivery limit is 20 minutes
-            isOverdue = (now - new Date(o.outForDeliveryAt).getTime()) > 1200000;
           }
           
           if (isOverdue) {

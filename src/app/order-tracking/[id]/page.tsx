@@ -11,7 +11,10 @@ import {
   Bike, 
   ChevronLeft,
   Loader2,
-  PackageCheck
+  PackageCheck,
+  Phone,
+  X,
+  AlertTriangle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import StatusCountdown from "@/components/StatusCountdown";
@@ -28,13 +31,21 @@ interface Order {
   preparingAt?: string;
   outForDeliveryAt?: string;
   deliveryCode?: string;
+  cancellationReason?: string;
+}
+
+interface StoreSettings {
+  restaurantName: string;
+  restaurantPhone: string;
 }
 
 export default function OrderTrackingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
+  const [storeInfo, setStoreInfo] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const statusSteps = [
     { label: "Pending", icon: Clock, value: "pending" },
@@ -65,7 +76,16 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
     };
 
     fetchOrder();
-    const interval = setInterval(fetchOrder, 2000); // Poll every 2 seconds
+    
+    // Fetch store info once
+    fetch("/api/admin/settings").then(r => r.json()).then(data => {
+      setStoreInfo({
+        restaurantName: data.restaurantName || "VibrantEats",
+        restaurantPhone: data.restaurantPhone || "+91 70933 29278"
+      });
+    });
+
+    const interval = setInterval(fetchOrder, 2000); 
     return () => clearInterval(interval);
   }, [id, order?.status]);
 
@@ -96,10 +116,61 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
 
   if (!order) {
     return (
-      <div className="tracking-container centered">
-        <h2>Order Not Found</h2>
-        <p>We couldn't find an order with this ID. Please check your link.</p>
-        <button className="btn-primary" onClick={() => router.push('/')}>Back to Menu</button>
+      <div className="tracking-container centered" style={{ background: '#fef2f2' }}>
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          style={{ 
+            textAlign: 'center', 
+            maxWidth: '450px', 
+            padding: '3rem', 
+            background: 'white', 
+            borderRadius: '2.5rem', 
+            boxShadow: '0 25px 50px -12px rgba(220, 38, 38, 0.1)' 
+          }}
+        >
+          <div style={{ 
+            width: '80px', 
+            height: '80px', 
+            background: '#fee2e2', 
+            borderRadius: '2rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            margin: '0 auto 2rem',
+            color: '#dc2626'
+          }}>
+            <Package size={40} />
+          </div>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 950, color: '#1e293b', marginBottom: '1rem' }}>Order Cancelled</h2>
+          <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.6, marginBottom: '2.5rem' }}>
+            We're sorry! This order was cancelled by the store. If you have questions, please contact us directly.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button 
+               className="btn-primary" 
+               onClick={() => router.push('/')}
+               style={{ padding: '1.25rem', borderRadius: '1rem', fontWeight: 800 }}
+             >
+               Back to Menu
+             </button>
+             <button 
+               onClick={() => setShowContactModal(true)}
+               style={{ 
+                 padding: '1rem', 
+                 color: '#64748b', 
+                 background: 'white',
+                 cursor: 'pointer',
+                 fontWeight: 700, 
+                 fontSize: '0.9rem',
+                 border: '1px solid #e2e8f0',
+                 borderRadius: '1rem'
+               }}
+             >
+               Contact Support
+             </button>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -189,8 +260,91 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
             {order.status === 'out-for-delivery' && "Your food is on the way! Watch the door."}
             {order.status === 'delivered' && "Enjoy your meal! Hope you love it."}
             {order.status === 'rejected' && "Unfortunately, the restaurant couldn't fulfill this order."}
+            {order.status === 'cancelled' && "This order has been cancelled by the shop."}
           </div>
         </motion.div>
+
+        {/* Cancelled Hero Overlay (Full coverage if cancelled) */}
+        {order.status === 'cancelled' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.9 }}
+             animate={{ opacity: 1, scale: 1 }}
+             style={{ 
+               position: 'fixed',
+               inset: 0,
+               zIndex: 2000,
+               background: '#fef2f2',
+               display: 'flex',
+               alignItems: 'center',
+               justifyContent: 'center',
+               padding: '2rem'
+             }}
+           >
+             <div style={{ 
+               textAlign: 'center', 
+               maxWidth: '450px', 
+               padding: '3rem', 
+               background: 'white', 
+               borderRadius: '2.5rem', 
+               boxShadow: '0 25px 50px -12px rgba(220, 38, 38, 0.1)' 
+             }}>
+               <div style={{ 
+                 width: '80px', 
+                 height: '80px', 
+                 background: '#fee2e2', 
+                 borderRadius: '2rem', 
+                 display: 'flex', 
+                 alignItems: 'center', 
+                 justifyContent: 'center', 
+                 margin: '0 auto 2rem',
+                 color: '#dc2626'
+               }}>
+                 <Package size={40} />
+               </div>
+               <h2 style={{ fontSize: '1.8rem', fontWeight: 950, color: '#1e293b', marginBottom: '1rem' }}>Order Cancelled</h2>
+               <p style={{ color: '#64748b', fontWeight: 600, lineHeight: 1.6, marginBottom: '2.5rem' }}>
+                 We're sorry! This order was cancelled by the store. If you have questions, please contact us directly.
+               </p>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 <button 
+                   className="btn-primary" 
+                   onClick={() => router.push('/')}
+                   style={{ padding: '1.25rem', borderRadius: '1rem', fontWeight: 800 }}
+                 >
+                   Back to Menu
+                 </button>
+                  <button 
+                    onClick={() => setShowContactModal(true)}
+                    style={{ 
+                      padding: '1rem', 
+                      color: '#64748b', 
+                      background: 'white',
+                      cursor: 'pointer',
+                      fontWeight: 700, 
+                      fontSize: '0.9rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '1rem'
+                    }}
+                  >
+                    Contact Support
+                  </button>
+                </div>
+                {order.cancellationReason && (
+                  <div style={{ 
+                    marginTop: '1.5rem', 
+                    padding: '1rem', 
+                    background: '#fef2f2', 
+                    borderRadius: '1rem', 
+                    border: '1px solid #fee2e2',
+                    textAlign: 'left'
+                  }}>
+                    <p style={{ fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', color: '#991b1b', marginBottom: '0.25rem' }}>Reason from Store</p>
+                    <p style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 600, wordBreak: 'break-all' }}>"{order.cancellationReason}"</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+         )}
 
         {/* Delivery OTP Card */}
         {order.status !== 'delivered' && order.deliveryCode && (
@@ -249,6 +403,74 @@ export default function OrderTrackingPage({ params }: { params: Promise<{ id: st
             </div>
           </motion.div>
         </div>
+
+        {/* Contact Support Modal */}
+        {showContactModal && (
+          <div style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            background: 'rgba(15, 23, 42, 0.4)', 
+            backdropFilter: 'blur(8px)', 
+            zIndex: 3000, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '1.5rem' 
+          }}>
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              style={{ 
+                background: 'white', 
+                width: '100%', 
+                maxWidth: '400px', 
+                borderRadius: '2rem', 
+                padding: '2rem', 
+                position: 'relative' 
+              }}
+            >
+              <button 
+                onClick={() => setShowContactModal(false)}
+                style={{ position: 'absolute', top: '1.25rem', right: '1.25rem', background: '#f8fafc', border: 'none', padding: '0.5rem', borderRadius: '0.5rem', cursor: 'pointer', color: '#64748b' }}
+              >
+                <X size={20} />
+              </button>
+
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ width: '60px', height: '60px', background: '#f0fdf4', borderRadius: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', color: '#16a34a' }}>
+                  <Phone size={28} />
+                </div>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#1e293b', marginBottom: '0.5rem' }}>Contact Store</h3>
+                <p style={{ color: '#64748b', fontWeight: 600, fontSize: '0.9rem', marginBottom: '2rem' }}>Our team at <span style={{ color: 'var(--primary)' }}>{storeInfo?.restaurantName}</span> is happy to help you!</p>
+                
+                <div style={{ background: '#f8fafc', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+                  <p style={{ fontSize: '0.7rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Official Support Number</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 900, color: '#1e293b' }}>{storeInfo?.restaurantPhone}</p>
+                </div>
+
+                <a 
+                  href={`tel:${storeInfo?.restaurantPhone}`}
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    gap: '0.75rem', 
+                    background: 'var(--primary)', 
+                    color: 'white', 
+                    padding: '1.25rem', 
+                    borderRadius: '1.25rem', 
+                    textDecoration: 'none', 
+                    fontWeight: 800, 
+                    boxShadow: '0 10px 20px rgba(220, 38, 38, 0.2)' 
+                  }}
+                >
+                  <Phone size={20} />
+                  Call Store Now
+                </a>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </main>
 
       <style jsx>{`

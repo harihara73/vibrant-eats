@@ -22,6 +22,7 @@ export default function AdminSettingsPage() {
 
   // Restaurant info
   const [restaurantName, setRestaurantName] = useState("VibrantEats Restaurant");
+  const [restaurantPhone, setRestaurantPhone] = useState("+91 70933 29278");
   const [restaurantLat, setRestaurantLat] = useState(17.4348);
   const [restaurantLng, setRestaurantLng] = useState(82.227);
 
@@ -35,6 +36,7 @@ export default function AdminSettingsPage() {
       .then(r => r.json())
       .then(data => {
         if (data.restaurantName) setRestaurantName(data.restaurantName);
+        if (data.restaurantPhone) setRestaurantPhone(data.restaurantPhone);
         if (data.restaurantLat) setRestaurantLat(data.restaurantLat);
         if (data.restaurantLng) setRestaurantLng(data.restaurantLng);
         if (data.deliveryRadiusKm) setDeliveryRadiusKm(data.deliveryRadiusKm);
@@ -71,6 +73,7 @@ export default function AdminSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantName,
+          restaurantPhone,
           restaurantLat,
           restaurantLng,
           deliveryRadiusKm,
@@ -131,6 +134,15 @@ export default function AdminSettingsPage() {
                     onChange={e => setRestaurantName(e.target.value)}
                     style={inputStyle}
                     placeholder="e.g. VibrantEats Kitchen"
+                  />
+                </div>
+                <div style={{ marginTop: "1rem" }}>
+                  <label style={labelStyle}>Restaurant Phone Number (Support)</label>
+                  <input
+                    value={restaurantPhone}
+                    onChange={e => setRestaurantPhone(e.target.value)}
+                    style={inputStyle}
+                    placeholder="e.g. +91 70933 29278"
                   />
                 </div>
               </div>

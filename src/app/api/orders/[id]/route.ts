@@ -39,7 +39,7 @@ export async function PATCH(
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid Order ID" }, { status: 400 });
     }
-    const { status, deliveryBoyId, deliveryBoyName, verificationCode } = await req.json();
+    const { status, deliveryBoyId, deliveryBoyName, verificationCode, cancellationReason } = await req.json();
     await connectDB();
 
     const existingOrder = await Order.findById(id);
@@ -71,6 +71,7 @@ export async function PATCH(
 
     const updateData: any = {};
     if (status) updateData.status = status;
+    if (cancellationReason !== undefined) updateData.cancellationReason = cancellationReason;
     if (deliveryBoyId !== undefined) updateData.deliveryBoyId = deliveryBoyId;
     if (deliveryBoyName !== undefined) updateData.deliveryBoyName = deliveryBoyName;
     if (status === 'accepted') {

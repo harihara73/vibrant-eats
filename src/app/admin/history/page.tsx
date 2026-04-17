@@ -157,6 +157,11 @@ export default function AdminHistoryPage() {
                       }}>
                         {order.status === 'delivered' ? 'Completed' : 'Cancelled'}
                       </span>
+                      {order.status !== 'delivered' && (order as any).cancellationReason && (
+                        <div style={{ fontSize: '0.6rem', color: '#991b1b', marginTop: '0.4rem', fontStyle: 'italic', maxWidth: '120px' }}>
+                           "{ (order as any).cancellationReason }"
+                        </div>
+                      )}
                     </td>
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>

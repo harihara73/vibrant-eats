@@ -939,6 +939,8 @@ textarea.form-input {
 .confirm-box {
   text-align: center;
   width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
 }
 
 .confirm-box h3 {

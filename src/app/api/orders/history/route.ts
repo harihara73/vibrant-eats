@@ -12,7 +12,7 @@ export async function GET() {
   try {
     await connectDB();
     const orders = await Order.find({ 
-      status: { $in: ["delivered", "rejected"] } 
+      status: { $in: ["delivered", "rejected", "cancelled"] } 
     }).sort({ updatedAt: -1 });
     return NextResponse.json(orders);
   } catch (error) {

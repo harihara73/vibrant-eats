@@ -12,7 +12,8 @@ import {
   Clock,
   CheckCircle2,
   Truck,
-  UtensilsCrossed
+  UtensilsCrossed,
+  XCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -23,6 +24,7 @@ interface Order {
   items: any[];
   address: string;
   createdAt: string;
+  cancellationReason?: string;
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
@@ -32,6 +34,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   "out-for-delivery":{ label: "Out for Delivery",   color: "#059669", bg: "#ecfdf5", icon: Truck },
   delivered:         { label: "Delivered",           color: "#16a34a", bg: "#f0fdf4", icon: CheckCircle2 },
   rejected:          { label: "Rejected",            color: "#dc2626", bg: "#fef2f2", icon: Clock },
+  cancelled:         { label: "Cancelled by Restaurant", color: "#991b1b", bg: "#fef2f2", icon: XCircle },
 };
 
 export default function MyOrdersPage() {
@@ -140,6 +143,26 @@ export default function MyOrdersPage() {
                       </span>
                     ))}
                   </div>
+
+                  {order.status === 'cancelled' && order.cancellationReason && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      style={{ 
+                        background: '#fef2f2', 
+                        padding: '1rem', 
+                        borderRadius: '0.75rem', 
+                        marginBottom: '1.25rem',
+                        border: '1px solid #fee2e2',
+                        fontSize: '0.85rem',
+                        color: '#991b1b',
+                        fontWeight: 600
+                      }}
+                    >
+                      <div style={{ textTransform: 'uppercase', fontSize: '0.65rem', fontWeight: 900, marginBottom: '0.25rem', opacity: 0.7 }}>Reason for cancellation</div>
+                      "{order.cancellationReason}"
+                    </motion.div>
+                  )}
 
                   <div className="card-bottom">
                     <div className="address-row">

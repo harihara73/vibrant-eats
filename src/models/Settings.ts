@@ -8,6 +8,7 @@ const SettingsSchema = new Schema({
   restaurantLat:  { type: Number, default: 17.4348 },
   restaurantLng:  { type: Number, default: 82.2270 },
   restaurantName: { type: String, default: 'VibrantEats Restaurant' },
+  restaurantPhone: { type: String, default: '+91 70933 29278' },
   // Delivery radius tiers
   deliveryRadiusKm: { type: Number, default: 5 },
   // Per-tier charges

@@ -20,7 +20,8 @@
    Trophy,
    Map as MapIcon,
    ShieldCheck,
-   AlertTriangle
+   AlertTriangle,
+   AlertCircle
  } from "lucide-react";
  import { motion, AnimatePresence } from "framer-motion";
  import { signOut, useSession } from "next-auth/react";
@@ -52,6 +53,7 @@
    const [loading, setLoading] = useState(true);
    const [activeTab, setActiveTab] = useState<'available' | 'ongoing' | 'performance'>('available');
    const [updatingId, setUpdatingId] = useState<string | null>(null);
+   const [error, setError] = useState<string | null>(null);
    
    const [performanceData, setPerformanceData] = useState<{ today: any; history: any[] }>({ today: { totalOrders: 0 }, history: [] });
    const [perfLoading, setPerfLoading] = useState(false);
@@ -164,6 +166,7 @@
  
    const handleStatusUpdate = async (id: string, newStatus: string, extraData: any = {}) => {
      setUpdatingId(id);
+     setError(null);
      try {
        const res = await fetch(`/api/orders/${id}`, {
          method: "PATCH",
@@ -176,12 +179,15 @@
          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus, ...extraData } : o));
          // Instant refresh from server to ensure perfect sync
          fetchOrders();
+         return true;
        } else {
          const errorData = await res.json();
-         alert(errorData.error || "Action failed. Are you logged in?");
+         setError(errorData.error || "Action failed. Please try again.");
+         return false;
        }
      } catch (err) {
-       alert("Network connection lost. Please try again.");
+       setError("Network connection lost. Please try again.");
+       return false;
      } finally {
        setUpdatingId(null);
      }
@@ -284,6 +290,39 @@
          </div>
        </div>
  
+       {/* Error Banner */}
+       <AnimatePresence>
+         {error && (
+           <motion.div 
+             initial={{ opacity: 0, y: -20 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, scale: 0.95 }}
+             className="delivery-error-banner"
+             style={{
+               background: '#fef2f2',
+               borderBottom: '2px solid #fee2e2',
+               padding: '1rem 1.5rem',
+               display: 'flex',
+               alignItems: 'center',
+               gap: '0.75rem',
+               position: 'sticky',
+               top: '0',
+               zIndex: 2500,
+               boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+             }}
+           >
+             <AlertCircle color="#dc2626" size={20} />
+             <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: 800, color: '#991b1b', flex: 1 }}>{error}</p>
+             <button 
+               onClick={() => setError(null)}
+               style={{ background: '#fee2e2', border: 'none', color: '#dc2626', padding: '0.25rem 0.5rem', borderRadius: '0.5rem', fontWeight: 900, cursor: 'pointer' }}
+             >
+               DISMISS
+             </button>
+           </motion.div>
+         )}
+       </AnimatePresence>
+
        {/* Assignment/New Order Overlay Notification */}
        <AnimatePresence>
          {newOrderAlert && (
@@ -477,7 +516,7 @@
                            style={{ background: '#f8fafc', color: '#1e293b', border: '1px solid #e2e8f0' }}
                            onClick={() => {
                              if (!order?.coordinates?.lat || !order?.coordinates?.lng) {
-                                 alert("Sorry, exact GPS coordinates are missing for this order, so the route map cannot be generated.");
+                                 setError("Sorry, exact GPS coordinates are missing for this order, so the route map cannot be generated.");
                                  return;
                              }
                              setShowRouteFor(order);
@@ -538,7 +577,7 @@
                backdropFilter: 'blur(8px)',
                zIndex: 3000,
                display: 'flex',
-               alignItems: 'flex-end', // Good for mobile-first thumb reach
+               alignItems: 'flex-end',
                justifyContent: 'center',
                padding: '0'
              }}
@@ -614,26 +653,29 @@
                </div>
 
                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                 <button 
-                   className="action-btn btn-deliver"
-                   style={{ 
-                     padding: '1.25rem', 
-                     height: 'auto', 
-                     fontSize: '1.1rem', 
-                     background: otpValue.length === 4 ? '#10b981' : '#cbd5e1', 
-                     opacity: otpValue.length === 4 ? 1 : 0.7,
-                     cursor: otpValue.length === 4 ? 'pointer' : 'not-allowed'
-                   }}
-                   disabled={otpValue.length !== 4 || updatingId === otpModalOrder._id}
-                   onClick={() => {
-                     if (otpModalOrder) {
-                       handleStatusUpdate(otpModalOrder._id, 'delivered', { verificationCode: otpValue });
-                       setOtpModalOrder(null);
-                     }
-                   }}
-                 >
-                   {updatingId === otpModalOrder._id ? <Loader2 className="animate-spin" size={24} /> : "Verify & Complete Delivery"}
-                 </button>
+                  <button 
+                    className="action-btn btn-deliver"
+                    style={{ 
+                      padding: '1.25rem', 
+                      height: 'auto', 
+                      fontSize: '1.1rem', 
+                      background: otpValue.length === 4 ? '#10b981' : '#cbd5e1', 
+                      opacity: otpValue.length === 4 ? 1 : 0.7,
+                      cursor: otpValue.length === 4 ? 'pointer' : 'not-allowed'
+                    }}
+                    disabled={otpValue.length !== 4 || updatingId === otpModalOrder._id}
+                    onClick={async () => {
+                      if (otpModalOrder) {
+                        const success = await handleStatusUpdate(otpModalOrder._id, 'delivered', { verificationCode: otpValue });
+                        if (success) {
+                           setOtpModalOrder(null);
+                           setOtpValue("");
+                        }
+                      }
+                    }}
+                  >
+                    {updatingId === otpModalOrder._id ? <Loader2 className="animate-spin" size={24} /> : "Verify & Complete Delivery"}
+                  </button>
                  <button 
                    className="action-btn"
                    style={{ background: 'transparent', color: 'var(--text-muted)', fontSize: '0.9rem', padding: '0.5rem', border: 'none' }}
