@@ -15,19 +15,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, account }) {
-      // First time login (user object is present)
+      // 1. If we have a user object (first time login/signin)
       if (user) {
-        try {
-          await connectDB();
-          const dbUser = await User.findOne({ email: user.email });
-          if (dbUser) {
-            token.sub = dbUser._id.toString(); // Use MongoDB ID as the session ID
-            token.role = dbUser.role;
-            token.phone = dbUser.phone;
-            token.addresses = dbUser.addresses || [];
+        // Inherit base properties from the user object (works for Credentials)
+        token.role = (user as any).role;
+        token.phone = (user as any).phone;
+        token.addresses = (user as any).addresses || [];
+        
+        // 2. For Google users, we MUST sync the MongoDB _id
+        if (account?.provider === "google") {
+          try {
+            await connectDB();
+            const dbUser = await User.findOne({ email: user.email });
+            if (dbUser) {
+              token.sub = dbUser._id.toString(); // Map Google session to MongoDB _id
+              token.role = dbUser.role;
+              token.phone = dbUser.phone;
+              token.addresses = dbUser.addresses || [];
+            }
+          } catch (err) {
+            console.error("[AUTH] Google Sync Error:", err);
           }
-        } catch (err) {
-          console.error("[AUTH] JWT Sync Error:", err);
         }
       }
       return token;
