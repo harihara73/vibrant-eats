@@ -1334,6 +1334,7 @@ export default function HomePage() {
           background: rgba(255, 255, 255, 0.05);
           padding: 0.6rem;
           border-radius: 2.25rem;
+          width: 100%;
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
           border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2372,11 +2373,11 @@ export default function HomePage() {
           .nav-logo { font-size: 1.25rem; }
           .user-name { display: none; }
 
-          .hero { padding: 4.5rem 6% 4rem; }
+          .hero { padding: 4.5rem 8% 4rem; }
           :global(.hero-title) { font-size: 2.22rem !important; color: #ffffff !important; line-height: 1.1 !important; }
           :global(.hero p) { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; }
 
-          .menu-section { padding: 2rem 4% 4rem; }
+          .menu-section { padding: 2rem 8% 4rem; }
           .section-header h2 { font-size: 2rem; }
           .category-nav-wrapper { flex-direction: column; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem; }
           .category-scroll { width: 100%; mask-image: linear-gradient(to right, black 80%, transparent); }
@@ -2411,7 +2412,9 @@ export default function HomePage() {
           .item-header h3 { font-size: 1.35rem; }
           .item-info { padding: 1.25rem; }
           .section-header h2 { font-size: 1.75rem; }
-          .hero { padding: 4rem 8% 3.5rem; }
+          .hero { padding: 4rem 10% 3.5rem; }
+          .menu-section { padding: 1.5rem 10% 3rem; }
+          .site-footer { padding: 3rem 10% 2rem; }
           .location-toggles { flex-direction: column; }
           .checkout-btn { font-size: 0.95rem; padding: 1rem; }
         }
