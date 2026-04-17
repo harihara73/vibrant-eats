@@ -15,30 +15,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, account }) {
-      // 1. If we have a user object (first time login/signin)
       if (user) {
-        // Inherit base properties from the user object (works for Credentials)
         token.role = (user as any).role;
         token.phone = (user as any).phone;
         token.addresses = (user as any).addresses || [];
-        
-        // 2. For Google users, we MUST sync the MongoDB _id
-        if (account?.provider === "google") {
-          try {
-            await connectDB();
-            const dbUser = await User.findOne({ email: user.email });
-            if (dbUser) {
-              token.sub = dbUser._id.toString(); // Map Google session to MongoDB _id
-              token.role = dbUser.role;
-              token.phone = dbUser.phone;
-              token.addresses = dbUser.addresses || [];
-            }
-          } catch (err) {
-            console.error("[AUTH] Google Sync Error:", err);
-          }
-        }
       }
       return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        (session.user as any).role = token.role;
+        (session.user as any).id = token.sub;
+        (session.user as any).phone = token.phone;
+        (session.user as any).addresses = token.addresses || [];
+
+        // For Google users, if we are missing the MongoDB info, look it up now (safely)
+        if (!token.phone || !token.role) {
+            try {
+                await connectDB();
+                const dbUser = await User.findOne({ email: session.user.email });
+                if (dbUser) {
+                    (session.user as any).id = dbUser._id.toString();
+                    (session.user as any).role = dbUser.role;
+                    (session.user as any).phone = dbUser.phone;
+                    (session.user as any).addresses = dbUser.addresses || [];
+                }
+            } catch (err) {
+                console.error("[AUTH] Session Sync Error:", err);
+            }
+        }
+      }
+      return session;
     },
     async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
