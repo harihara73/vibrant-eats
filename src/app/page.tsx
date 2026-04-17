@@ -2373,9 +2373,11 @@ export default function HomePage() {
           .nav-logo { font-size: 1.25rem; }
           .user-name { display: none; }
 
-          .hero { padding: 4.5rem 8% 4rem; }
-          :global(.hero-title) { font-size: 2.22rem !important; color: #ffffff !important; line-height: 1.1 !important; }
-          :global(.hero p) { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; }
+          .hero { padding: 4.5rem 0 4rem; }
+          .hero-content { padding: 0 8%; width: 100%; }
+          :global(.hero-title) { font-size: 2.22rem !important; color: #ffffff !important; line-height: 1.1 !important; width: 100%; }
+          :global(.hero p) { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; width: 100%; }
+          .hero-search-wrapper { width: 100%; }
 
           .menu-section { padding: 2rem 8% 4rem; }
           .section-header h2 { font-size: 2rem; }
@@ -2409,10 +2411,11 @@ export default function HomePage() {
         /* Mobile small (≤ 480px) */
         @media (max-width: 480px) {
           :global(.hero-title) { font-size: 1.88rem !important; color: #ffffff !important; }
+          .hero-content { padding: 0 10%; }
           .item-header h3 { font-size: 1.35rem; }
           .item-info { padding: 1.25rem; }
           .section-header h2 { font-size: 1.75rem; }
-          .hero { padding: 4rem 10% 3.5rem; }
+          .hero { padding: 4rem 0 3.5rem; }
           .menu-section { padding: 1.5rem 10% 3rem; }
           .site-footer { padding: 3rem 10% 2rem; }
           .location-toggles { flex-direction: column; }
