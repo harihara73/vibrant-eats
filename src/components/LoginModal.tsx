@@ -185,7 +185,6 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
             body: JSON.stringify({ 
                 name, 
                 phone, 
-                email: loginEmail, // Use the email from login
                 addresses: [fullAddress] 
             }),
         });

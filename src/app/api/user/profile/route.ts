@@ -16,8 +16,8 @@ export async function PATCH(req: Request) {
     const { name, email, phone, address, addresses } = await req.json();
     await connectDB();
 
-    // Support both single address (for onboarding) and full list (for profile management)
-    const updateData: any = { name, email, phone };
+    // Only update name, phone, and addresses. Do not allow updating email here to avoid unique constraint issues.
+    const updateData: any = { name, phone };
     if (addresses) updateData.addresses = addresses;
     else if (address) updateData.addresses = [address];
 
