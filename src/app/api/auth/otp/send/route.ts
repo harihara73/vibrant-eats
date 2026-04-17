@@ -3,16 +3,19 @@ import OTP from "@/models/OTP";
 import User from "@/models/User";
 import connectDB from "@/lib/mongodb";
 import { cookies } from "next/headers";
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  console.log(`[${new Date().toLocaleTimeString()}] OTP Send Request Received`);
+  console.log(`[${new Date().toLocaleTimeString()}] Email OTP Send Request Received`);
   try {
-    const { phone } = await req.json();
+    const { email } = await req.json();
 
-    if (!phone) {
-      return NextResponse.json({ error: "Phone number is required" }, { status: 400 });
+    if (!email) {
+      return NextResponse.json({ error: "Email address is required" }, { status: 400 });
     }
 
     // Generate 6-digit OTP
@@ -21,38 +24,58 @@ export async function POST(req: Request) {
     await connectDB();
     
     // Save to DB (expires in 5 mins automatically)
-    await OTP.deleteMany({ phone });
-    await OTP.create({ phone, code, createdAt: new Date() });
+    await OTP.deleteMany({ email });
+    await OTP.create({ email, code, createdAt: new Date() });
 
-    // --- SMS DELIVERY LOGIC ---
-    let smsSent = false;
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // --- EMAIL DELIVERY LOGIC ---
+    let emailSent = false;
     
-    // 1. Try Twilio (if keys provided)
-    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+    if (process.env.RESEND_API_KEY) {
         try {
-            // Integration code would go here
-            console.log("[SMS] Attempting real SMS delivery via Twilio...");
-            // smsSent = true;
-        } catch (smsErr) {
-            console.error("[SMS] Twilio Failed:", smsErr);
+            console.log("[Email] Attempting real delivery via Resend...");
+            const { data, error } = await resend.emails.send({
+                from: 'VibrantEats <onboarding@resend.dev>', // You should update this to your domain later
+                to: [email],
+                subject: 'Your VibrantEats Login Code',
+                html: `
+                    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px; margin: 0 auto;">
+                        <h2 style="color: #dc2626; text-align: center;">Welcome to VibrantEats</h2>
+                        <p style="font-size: 16px; color: #333;">Hello,</p>
+                        <p style="font-size: 16px; color: #333;">Your verification code for logging into VibrantEats is:</p>
+                        <div style="background: #fdf2f2; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                            <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #dc2626;">${code}</span>
+                        </div>
+                        <p style="font-size: 14px; color: #666; text-align: center;">This code will expire in 5 minutes.</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+                        <p style="font-size: 12px; color: #999; text-align: center;">If you didn't request this code, please ignore this email.</p>
+                    </div>
+                `,
+            });
+
+            if (error) {
+                console.error("[Email] Resend Error:", error);
+            } else {
+                console.log("[Email] Sent successfully:", data?.id);
+                emailSent = true;
+            }
+        } catch (emailErr) {
+            console.error("[Email] Unexpected error:", emailErr);
         }
     }
 
-    // fallback: MOCK SMS (Terminal)
-    if (!smsSent) {
-        console.log("\n--- [MOCK SMS] ---");
-        console.log(`To: ${phone}`);
+    // fallback: MOCK EMAIL (Terminal)
+    if (!emailSent) {
+        console.log("\n--- [MOCK EMAIL] ---");
+        console.log(`To: ${email}`);
         console.log(`Your verification code is: ${code}`);
         console.log("------------------\n");
     }
 
     // --- RESPONSE LOGIC ---
-    // If no real SMS was sent, we provide the code to the UI as 'devCode'
-    // This allows testing in production without real SMS integrated yet.
-    const shouldReturnDevCode = !smsSent; 
+    // If no real email was sent, we provide the code to the UI as 'devCode'
+    const shouldReturnDevCode = !emailSent; 
 
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ email });
 
     if (shouldReturnDevCode) {
         const cookieStore = await cookies();
@@ -61,7 +84,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: smsSent ? "OTP sent to your phone!" : "OTP sent (Simulation Mode)",
+      message: emailSent ? "OTP sent to your email!" : "OTP sent (Simulation Mode)",
       isNewUser: !user || !user.name || user.name.startsWith("User "),
       ...(shouldReturnDevCode ? { devCode: code } : {})
     });

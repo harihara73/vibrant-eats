@@ -12,9 +12,22 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
-  const { update } = useSession();
-  const [step, setStep] = useState<"phone" | "otp" | "profile">("phone");
-  const [phone, setPhone] = useState("");
+  const { data: session, status, update } = useSession();
+  const [step, setStep] = useState<"email" | "otp" | "profile">("email");
+  const [loginEmail, setLoginEmail] = useState("");
+
+  // Detect if user is logged in via Google but missing a phone number
+  useEffect(() => {
+    if (isOpen && status === "authenticated" && session?.user) {
+        const user = session.user as any;
+        if (!user.phone && step !== "profile") {
+            setStep("profile");
+            setLoginEmail(user.email || "");
+            setName(user.name || "");
+            setIsNewUser(true); // Treat as new if profile is incomplete
+        }
+    }
+  }, [isOpen, status, session, step]);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +45,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
   const [area, setArea] = useState("");
   const [landmark, setLandmark] = useState("");
   const [pincode, setPincode] = useState("");
+  const [phone, setPhone] = useState("");
 
   // Auto-capture GPS when entering profile step
   const triggerGpsCapture = () => {
@@ -77,8 +91,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phone.length < 10) {
-        setError("Please enter a valid phone number");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(loginEmail)) {
+        setError("Please enter a valid email address");
         return;
     }
     
@@ -89,7 +104,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
       const res = await fetch("/api/auth/otp/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ email: loginEmail }),
       });
       
       const data = await res.json();
@@ -116,9 +131,9 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
     setError("");
 
     try {
-      console.log(`[CLIENT] Attempting signIn with Phone: ${phone}, OTP: ${otp}`);
-      const res = await signIn("phone-login", {
-        phone,
+      console.log(`[CLIENT] Attempting signIn with Email: ${loginEmail}, OTP: ${otp}`);
+      const res = await signIn("email-login", {
+        email: loginEmail,
         otp,
         redirect: false,
       });
@@ -144,7 +159,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !doorNo || !addressLine || !area || !landmark || !pincode) {
+    if (!name || !phone || !doorNo || !addressLine || !area || !landmark || !pincode) {
         setError("Please fill all fields to complete your profile.");
         return;
     }
@@ -167,13 +182,19 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         const res = await fetch("/api/user/profile", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, addresses: [fullAddress] }),
+            body: JSON.stringify({ 
+                name, 
+                phone, 
+                email: loginEmail, // Use the email from login
+                addresses: [fullAddress] 
+            }),
         });
 
         if (res.ok) {
             await update({ 
                 name, 
-                email, 
+                phone,
+                email: loginEmail,
                 addresses: [fullAddress] 
             });
             onSuccess();
@@ -220,7 +241,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                 <div className="modal-inner">
                   {/* Progress Indicator */}
                   <div className="progress-bar-wrap">
-                    <div className={`progress-dot ${step === 'phone' || step === 'otp' || step === 'profile' ? 'active' : ''}`} />
+                    <div className={`progress-dot ${step === 'email' || step === 'otp' || step === 'profile' ? 'active' : ''}`} />
                     <div className={`progress-dot ${step === 'otp' || step === 'profile' ? 'active' : ''}`} />
                     <div className={`progress-dot ${step === 'profile' ? 'active' : ''}`} />
                   </div>
@@ -229,18 +250,18 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                     <div className="body-content">
                       <header className="auth-header">
                         <div className="brand-icon-circle">
-                          {step === "phone" && <Phone size={28} />}
+                          {step === "email" && <Mail size={28} />}
                           {step === "otp" && <ShieldCheck size={28} />}
                           {step === "profile" && <User size={28} />}
                         </div>
                         <h2 className="premium-title">
-                          {step === "phone" && "Welcome"}
+                          {step === "email" && "Welcome"}
                           {step === "otp" && "Verification"}
                           {step === "profile" && "Profile Details"}
                         </h2>
                         <p className="premium-subtitle">
-                          {step === "phone" && "Enter your mobile number to begin."}
-                          {step === "otp" && `We've sent a code to ${phone}`}
+                          {step === "email" && "Enter your email address to begin."}
+                          {step === "otp" && `We've sent a code to ${loginEmail}`}
                           {step === "profile" && "Help us personalize your gourmet experience."}
                         </p>
                       </header>
@@ -252,26 +273,47 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                       )}
 
                       <form onSubmit={
-                          step === "phone" ? handleSendOtp : 
+                          step === "email" ? handleSendOtp : 
                           step === "otp" ? handleVerifyOtp : 
                           handleSaveProfile
                       } className="auth-form">
-                        {step === "phone" && (
-                          <div className="premium-input-group">
-                            <label>Mobile Number</label>
-                            <div className="premium-input-wrapper">
-                              <span className="country-code">+91</span>
-                              <input 
-                                className="premium-field"
-                                type="tel" 
-                                placeholder="00000 00000" 
-                                value={phone}
-                                onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                                required
-                                autoFocus
-                              />
+                        {step === "email" && (
+                          <>
+                            <div className="premium-input-group">
+                              <label>Email Address</label>
+                              <div className="premium-input-wrapper">
+                                <Mail size={20} style={{ marginRight: '1rem', color: '#94a3b8' }} />
+                                <input 
+                                  className="premium-field"
+                                  type="email" 
+                                  placeholder="name@example.com" 
+                                  value={loginEmail}
+                                  onChange={e => setLoginEmail(e.target.value)}
+                                  required
+                                  autoFocus
+                                />
+                              </div>
                             </div>
-                          </div>
+
+                            <div className="auth-divider">
+                              <span>OR</span>
+                            </div>
+
+                            <button 
+                              type="button" 
+                              className="google-signin-btn"
+                              onClick={() => signIn("google")}
+                              disabled={loading}
+                            >
+                              <svg width="20" height="20" viewBox="0 0 24 24" style={{ marginRight: '0.75rem' }}>
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                              </svg>
+                              Continue with Google
+                            </button>
+                          </>
                         )}
 
                         {step === "otp" && (
@@ -339,10 +381,10 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                               </div>
                               
                               <div className="field-row">
-                                <label>Email</label>
+                                <label>Phone Number</label>
                                 <div className="icon-field-wrap">
-                                  <Mail size={18} />
-                                  <input type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                                  <Phone size={18} />
+                                  <input type="tel" placeholder="00000 00000" value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))} required />
                                 </div>
                               </div>
 
@@ -397,7 +439,7 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
                             ) : (
                               <>
                                 <span>
-                                  {step === "phone" && "Send Access Code"}
+                                  {step === "email" && "Send Access Code"}
                                   {step === "otp" && "Verify Access"}
                                   {step === "profile" && "Complete Sign Up"}
                                 </span>
@@ -410,8 +452,8 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
 
                       <footer className="auth-footer">
                         {step === "otp" && (
-                            <button className="text-btn" onClick={() => setStep("phone")}>
-                              Correction? Change phone number
+                            <button className="text-btn" onClick={() => setStep("email")}>
+                              Correction? Change email address
                             </button>
                         )}
                         {step === "profile" && (
@@ -598,6 +640,39 @@ export default function LoginModal({ isOpen, onClose, onSuccess }: LoginModalPro
         .auth-footer { margin-top: 1.5rem; text-align: center; }
         .text-btn { background: none; border: none; color: #64748b; font-weight: 700; font-size: 0.9rem; text-decoration: underline; cursor: pointer; }
         .fine-print { font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
+
+        .google-signin-btn {
+          width: 100%;
+          padding: 1rem;
+          background: white;
+          border: 2px solid #f1f5f9;
+          border-radius: 1.25rem;
+          color: #0f172a;
+          font-weight: 700;
+          font-size: 1rem;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-bottom: 2rem;
+        }
+        .google-signin-btn:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-2px); }
+        .google-signin-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .auth-divider {
+          display: flex;
+          align-items: center;
+          margin: 1.5rem 0;
+          color: #94a3b8;
+          font-size: 0.75rem;
+          font-weight: 800;
+        }
+        .auth-divider::before, .auth-divider::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background: #f1f5f9;
+        }
+        .auth-divider span { padding: 0 1rem; }
 
         @media (max-width: 640px) {
           .modal-container { margin: 0; align-self: flex-end; }

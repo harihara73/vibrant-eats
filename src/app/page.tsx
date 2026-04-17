@@ -109,6 +109,11 @@ export default function HomePage() {
         if ((session.user as any).address) {
             setAddress((session.user as any).address);
         }
+
+        // Auto-open modal if phone is missing (e.g. after Google Login)
+        if (!(session.user as any).phone) {
+            setIsLoginModalOpen(true);
+        }
     }
   }, [session]);
 

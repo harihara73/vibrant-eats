@@ -13,11 +13,11 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { name, email, address, addresses } = await req.json();
+    const { name, email, phone, address, addresses } = await req.json();
     await connectDB();
 
     // Support both single address (for onboarding) and full list (for profile management)
-    const updateData: any = { name, email };
+    const updateData: any = { name, email, phone };
     if (addresses) updateData.addresses = addresses;
     else if (address) updateData.addresses = [address];
 
@@ -36,6 +36,7 @@ export async function PATCH(req: Request) {
       user: {
         name: updatedUser.name,
         email: updatedUser.email,
+        phone: updatedUser.phone,
         addresses: updatedUser.addresses
       }
     });
