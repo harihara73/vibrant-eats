@@ -2377,7 +2377,9 @@ export default function HomePage() {
           .hero-content { padding: 0 8%; width: 100%; }
           :global(.hero-title) { font-size: 2.22rem !important; color: #ffffff !important; line-height: 1.1 !important; width: 100%; }
           :global(.hero p) { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; width: 100%; }
-          .hero-search-wrapper { width: 100%; }
+          .hero-search-wrapper { width: 100%; padding: 0.4rem; }
+          .gourmet-search { padding: 0 0.35rem 0 1rem; gap: 0.5rem; }
+          .search-pill-btn { padding: 0.7rem 1.25rem; font-size: 0.85rem; }
 
           .menu-section { padding: 2rem 8% 4rem; }
           .section-header h2 { font-size: 2rem; }
@@ -2420,6 +2422,9 @@ export default function HomePage() {
           .site-footer { padding: 3rem 10% 2rem; }
           .location-toggles { flex-direction: column; }
           .checkout-btn { font-size: 0.95rem; padding: 1rem; }
+          .gourmet-search { padding: 0 0.25rem 0 0.75rem; gap: 0.25rem; }
+          .search-pill-btn { padding: 0.6rem 0.85rem; font-size: 0.8rem; }
+          .search-icon { width: 16px; height: 16px; }
         }
 
         /* Extra small (≤ 360px) */
