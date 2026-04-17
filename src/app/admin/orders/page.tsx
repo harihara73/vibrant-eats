@@ -79,7 +79,7 @@ export default function OrdersPage() {
     };
 
     runFetch();
-    interval = setInterval(runFetch, 2000); // Poll every 2 seconds
+    interval = setInterval(runFetch, 1000); // Reduced from 2s to 1s for "Instant" feel
     return () => clearInterval(interval);
   }, []);
 

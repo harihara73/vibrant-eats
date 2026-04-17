@@ -82,7 +82,7 @@
    useEffect(() => {
      if (session?.user) {
        fetchOrders();
-       const interval = setInterval(fetchOrders, 4000); // Poll every 4 seconds
+       const interval = setInterval(fetchOrders, 2000); // Reduced from 4s to 2s for snappier updates
        return () => clearInterval(interval);
      }
    }, [session]);
@@ -170,10 +170,8 @@
        if (res.ok) {
          // Optimistic local update
          setOrders(prev => prev.map(o => o._id === id ? { ...o, status: newStatus, ...extraData } : o));
-         if (newStatus === 'delivered' || (newStatus === 'ready-to-pickup' && extraData.deliveryBoyId === null)) {
-           // If delivered OR passed/rejected, remove from local list to refresh from server
-           if (newStatus === 'ready-to-pickup') setOrders([]); 
-         }
+         // Instant refresh from server to ensure perfect sync
+         fetchOrders();
        } else {
          const errorData = await res.json();
          alert(errorData.error || "Action failed. Are you logged in?");
