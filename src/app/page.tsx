@@ -2373,8 +2373,8 @@ export default function HomePage() {
           .user-name { display: none; }
 
           .hero { padding: 4.5rem 6% 4rem; }
-          .hero-title { font-size: 2.2rem !important; color: #ffffff !important; line-height: 1.1 !important; }
-          .hero p { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; }
+          :global(.hero-title) { font-size: 2.22rem !important; color: #ffffff !important; line-height: 1.1 !important; }
+          :global(.hero p) { font-size: 1rem !important; margin-bottom: 2rem !important; color: rgba(255,255,255,0.8) !important; }
 
           .menu-section { padding: 2rem 4% 4rem; }
           .section-header h2 { font-size: 2rem; }
@@ -2407,7 +2407,7 @@ export default function HomePage() {
 
         /* Mobile small (≤ 480px) */
         @media (max-width: 480px) {
-          .hero-title { font-size: 1.8rem !important; color: #ffffff !important; }
+          :global(.hero-title) { font-size: 1.88rem !important; color: #ffffff !important; }
           .item-header h3 { font-size: 1.35rem; }
           .item-info { padding: 1.25rem; }
           .section-header h2 { font-size: 1.75rem; }
@@ -2419,8 +2419,8 @@ export default function HomePage() {
         /* Extra small (≤ 360px) */
         @media (max-width: 360px) {
           .nav-logo { font-size: 1.1rem; }
-          .hero-title { font-size: 2rem; color: #ffffff !important; }
-          .hero p { font-size: 0.95rem; }
+          :global(.hero-title) { font-size: 2rem !important; color: #ffffff !important; }
+          :global(.hero p) { font-size: 0.95rem !important; }
         }
       `}</style>
       <ProfileModal 
